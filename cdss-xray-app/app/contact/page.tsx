@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Github } from 'lucide-react';
 
 export default function ContactPage() {
   const [formState, setFormState] = useState({
@@ -98,6 +98,20 @@ export default function ContactPage() {
                     123 Medical Drive<br />
                     Boston, MA 02115
                   </p>
+                </div>
+              </li>
+              <li className="flex items-start">
+                <Github className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3 mt-1" />
+                <div>
+                  <p className="font-medium">GitHub Repository</p>
+                  <a 
+                    href="https://github.com/MMansy19/cdss-xray-app" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  >
+                    github.com/MMansy19/cdss-xray-app
+                  </a>
                 </div>
               </li>
             </ul>
@@ -241,6 +255,17 @@ export default function ContactPage() {
           </p>
           <p className="text-gray-700 dark:text-gray-300">
             Please contact us at <a href="mailto:partnerships@cdss-xray.example" className="text-blue-600 dark:text-blue-400 hover:underline">partnerships@cdss-xray.example</a> with details about your organization and interests.
+          </p>
+          <p className="mt-4 text-gray-700 dark:text-gray-300">
+            Check out our <a 
+              href="https://github.com/MMansy19/cdss-xray-app" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-blue-600 dark:text-blue-400 hover:underline flex items-center inline-flex"
+            >
+              <Github className="h-4 w-4 mr-1" />
+              GitHub repository
+            </a> to learn more about our project's technical implementation.
           </p>
         </div>
       </div>

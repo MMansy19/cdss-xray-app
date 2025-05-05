@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import classNames from 'classnames';
-import { Menu, X, LogOut } from 'lucide-react';
+import { Menu, X, LogOut, Github } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 
 const Navbar = () => {
@@ -63,6 +63,15 @@ const Navbar = () => {
                     </Link>
                   )
                 )}
+                <a 
+                  href="https://github.com/MMansy19/cdss-xray-app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 flex items-center transition-colors"
+                >
+                  <Github className="h-4 w-4 mr-1" />
+                  GitHub
+                </a>
               </div>
             </div>
           </div>
@@ -134,6 +143,17 @@ const Navbar = () => {
               </Link>
             )
           )}
+          
+          <a 
+            href="https://github.com/MMansy19/cdss-xray-app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <Github className="h-5 w-5 mr-2" />
+            GitHub Repository
+          </a>
           
           {isAuthenticated ? (
             <button 
