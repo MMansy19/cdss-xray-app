@@ -25,7 +25,7 @@ export default function RegisterPage() {
       <div className="flex justify-center items-center min-h-screen">
         <div className="flex flex-col items-center">
           <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
+          <p className="mt-4 text-gray-400">Loading...</p>
         </div>
       </div>
     );
@@ -37,61 +37,66 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row relative">
-      {/* Background image - overlaid with a semi-transparent layer */}
-      <div className="absolute inset-0 z-0">
+    <div className=" flex flex-col md:flex-row">
+      {/* Background image - full screen with gradient overlay */}
+      <div className="fixed inset-0 z-0">
         <Image
           src="/background.jpeg"
           alt="Background"
           fill
           priority
-          className="object-cover opacity-20"
+          className="object-cover"
+          quality={100}
         />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/70"></div>
       </div>
       
-      {/* Left side - Branding */}
-      <div className=" md:w-1/2 p-8 flex flex-col justify-center relative z-10">
-        <div className="max-w-md mx-auto">
-          <div className="flex items-center space-x-3 mb-6">
-            <Image 
-              src="/logo.png" 
-              alt="CDSS X-Ray Logo" 
-              width={48} 
-              height={48} 
-              className="rounded-md"
-            />
-            <h1 className="text-3xl md:text-4xl font-bold text-white">
-              Join CDSS X-Ray
-            </h1>
+      {/* Content container */}
+      <div className="flex flex-col md:flex-row relative z-10 w-full ">
+        {/* Left side - Branding */}
+        <div className="md:w-1/2 p-8 flex flex-col justify-center backdrop-blur-[2px]">
+          <div className="max-w-md mx-auto bg-black/40 p-8 rounded-lg shadow-2xl backdrop-blur-[2px]">
+            <div className="flex items-center space-x-3 mb-6">
+              <Image 
+                src="/logo3.png" 
+                alt="CDSS X-Ray Logo" 
+                width={48} 
+                height={48} 
+                className="rounded-md"
+              />
+              <h1 className="text-3xl md:text-4xl font-bold text-white">
+                Join CDSS X-Ray
+              </h1>
+            </div>
+            <p className="text-xl text-blue-200 mb-6">
+              Create your account
+            </p>
+            <p className="text-gray-200">
+              Become part of our community of medical professionals using AI-powered tools to improve diagnostic accuracy and patient care.
+            </p>
           </div>
-          <p className="text-xl text-blue-100 mb-6">
-            Create your account
-          </p>
-          <p className="text-blue-100">
-            Become part of our community of medical professionals using AI-powered tools to improve diagnostic accuracy and patient care.
-          </p>
         </div>
-      </div>
-      
-      {/* Right side - Register Form */}
-      <div className="bg-gray-900/90 md:w-1/2 p-8 flex flex-col justify-center relative z-10">
-        <div className="max-w-md mx-auto w-full">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-2">Create an Account</h2>
-            <p className="text-gray-400">
-              Enter your details to register
-            </p>
-          </div>
-          
-          <RegisterForm />
-          
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-400">
-              Already have an account?{" "}
-              <Link href="/login" className="text-blue-400 hover:underline">
-                Sign in
-              </Link>
-            </p>
+        
+        {/* Right side - Register Form */}
+        <div className="md:w-1/2 p-8 flex flex-col justify-center backdrop-blur-[2px]">
+          <div className="max-w-md mx-auto w-full bg-gray-900/80 p-8 rounded-lg shadow-2xl backdrop-blur-[2px]">
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-2 text-white">Create an Account</h2>
+              <p className="text-gray-300">
+                Enter your details to register
+              </p>
+            </div>
+            
+            <RegisterForm />
+            
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-300">
+                Already have an account?{" "}
+                <Link href="/login" className="text-blue-400 hover:underline font-medium">
+                  Sign in
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>

@@ -33,7 +33,7 @@ const Navbar = () => {
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center space-x-2">
                 <Image 
-                  src="/logo.png" 
+                  src="/logo3.png" 
                   alt="CDSS X-Ray Logo" 
                   width={32} 
                   height={32} 

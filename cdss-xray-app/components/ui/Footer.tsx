@@ -14,7 +14,7 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row items-center mb-6 md:mb-0">
             <div className="flex items-center mb-3 md:mb-0 md:mr-4">
               <Image 
-                src="/logo.png" 
+                src="/logo3.png" 
                 alt="CDSS X-Ray Logo" 
                 width={28} 
                 height={28} 
