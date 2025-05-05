@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import classNames from 'classnames';
 import { Menu, X, LogOut } from 'lucide-react';
-import ThemeToggle from './ThemeToggle';
 import useAuth from '@/hooks/useAuth';
 
 const Navbar = () => {
@@ -68,10 +67,8 @@ const Navbar = () => {
             </div>
           </div>
           
-          {/* Right side: theme toggle and auth */}
-          <div className="hidden md:flex items-center space-x-4">
-            <ThemeToggle />
-            
+          {/* Right side: auth only */}
+          <div className="hidden md:flex items-center">
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 <span className="text-sm font-medium">
@@ -96,8 +93,7 @@ const Navbar = () => {
           </div>
           
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center space-x-2">
-            <ThemeToggle />
+          <div className="md:hidden">
             <button
               onClick={toggleMobileMenu}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"

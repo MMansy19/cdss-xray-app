@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 export const metadata: Metadata = {
   title: "CDSS X-Ray - Clinical Decision Support System",
@@ -27,29 +28,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
-        {/* Theme initialization script to prevent flash of wrong theme */}
+        {/* Theme initialization script - always set to dark mode */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 try {
-                  const savedTheme = localStorage.getItem('theme');
-                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  
-                  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
+                  // Always set dark mode
+                  document.documentElement.classList.add('dark');
+                  localStorage.setItem('theme', 'dark');
                 } catch (err) { }
               })();
             `,
           }}
         />
       </head>
-      <body className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
+      <body className="flex flex-col min-h-screen bg-gray-900 text-gray-100">
+        {/* Include ThemeToggle component to enforce dark mode on client-side */}
+        <ThemeToggle />
         <Navbar />
         <main className="flex-grow">
           {children}
