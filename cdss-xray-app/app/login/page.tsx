@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import LoginForm from '@/components/ui/LoginForm';
 import useAuth from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
@@ -40,9 +41,18 @@ export default function LoginPage() {
       {/* Left side - Branding */}
       <div className="bg-blue-600 md:w-1/2 p-8 flex flex-col justify-center">
         <div className="max-w-md mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            CDSS X-Ray
-          </h1>
+          <div className="flex items-center space-x-3 mb-6">
+            <Image 
+              src="/logo.png" 
+              alt="CDSS X-Ray Logo" 
+              width={48} 
+              height={48} 
+              className="rounded-md"
+            />
+            <h1 className="text-3xl md:text-4xl font-bold text-white">
+              CDSS X-Ray
+            </h1>
+          </div>
           <p className="text-xl text-blue-100 mb-6">
             Clinical Decision Support System
           </p>

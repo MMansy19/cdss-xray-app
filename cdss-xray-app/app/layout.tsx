@@ -6,6 +6,19 @@ import Footer from "@/components/ui/Footer";
 export const metadata: Metadata = {
   title: "CDSS X-Ray - Clinical Decision Support System",
   description: "AI-powered clinical decision support system for chest X-ray analysis",
+  icons: {
+    icon: [
+      {
+        url: '/logo.png',
+        href: '/logo.png',
+      },
+    ],
+    apple: {
+      url: '/logo.png',
+      sizes: '180x180',
+      type: 'image/png',
+    },
+  },
 };
 
 export default function RootLayout({

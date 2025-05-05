@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import classNames from 'classnames';
 import { Menu, X, LogOut } from 'lucide-react';
@@ -31,7 +32,14 @@ const Navbar = () => {
           {/* Logo and desktop navigation */}
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <Link href="/">
+              <Link href="/" className="flex items-center space-x-2">
+                <Image 
+                  src="/logo.png" 
+                  alt="CDSS X-Ray Logo" 
+                  width={32} 
+                  height={32} 
+                  className="rounded-md"
+                />
                 <span className="font-bold text-xl text-blue-600 dark:text-blue-400">CDSS X-Ray</span>
               </Link>
             </div>
