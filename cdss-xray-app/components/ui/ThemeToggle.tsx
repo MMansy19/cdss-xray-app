@@ -6,33 +6,50 @@ import { Moon, Sun } from 'lucide-react';
 const ThemeToggle = () => {
   // Initialize with system preference or stored preference
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  // Add mounted state to prevent hydration mismatch
+  const [mounted, setMounted] = useState<boolean>(false);
 
   // Load theme preference from localStorage on mount
   useEffect(() => {
+    // Set mounted state to true
+    setMounted(true);
+    
+    // Get theme from localStorage or system preference
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const shouldBeDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
     
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      setIsDarkMode(true);
+    // Update state and document class
+    setIsDarkMode(shouldBeDark);
+    
+    // Apply the theme to the document
+    if (shouldBeDark) {
       document.documentElement.classList.add('dark');
     } else {
-      setIsDarkMode(false);
       document.documentElement.classList.remove('dark');
     }
   }, []);
 
   // Toggle theme function
   const toggleTheme = () => {
-    if (isDarkMode) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    } else {
+    // Toggle dark mode state
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    
+    // Apply theme change to document
+    if (newDarkMode) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
-    
-    setIsDarkMode(!isDarkMode);
   };
+
+  // Don't render anything until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <button
