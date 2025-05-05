@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { Github } from 'lucide-react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -40,6 +41,15 @@ const Footer = () => {
             </a>
             <a href="#" className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
               Terms of Use
+            </a>
+            <a 
+              href="https://github.com/MMansy19/cdss-xray-app" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            >
+              <Github className="h-4 w-4 mr-1" />
+              GitHub
             </a>
           </div>
         </div>
