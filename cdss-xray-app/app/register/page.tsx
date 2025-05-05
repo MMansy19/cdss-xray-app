@@ -37,9 +37,20 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen flex flex-col md:flex-row relative">
+      {/* Background image - overlaid with a semi-transparent layer */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/background.jpeg"
+          alt="Background"
+          fill
+          priority
+          className="object-cover opacity-20"
+        />
+      </div>
+      
       {/* Left side - Branding */}
-      <div className="bg-blue-600 md:w-1/2 p-8 flex flex-col justify-center">
+      <div className=" md:w-1/2 p-8 flex flex-col justify-center relative z-10">
         <div className="max-w-md mx-auto">
           <div className="flex items-center space-x-3 mb-6">
             <Image 
@@ -63,11 +74,11 @@ export default function RegisterPage() {
       </div>
       
       {/* Right side - Register Form */}
-      <div className="bg-white dark:bg-gray-900 md:w-1/2 p-8 flex flex-col justify-center">
+      <div className="bg-gray-900/90 md:w-1/2 p-8 flex flex-col justify-center relative z-10">
         <div className="max-w-md mx-auto w-full">
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-2">Create an Account</h2>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-400">
               Enter your details to register
             </p>
           </div>
@@ -75,9 +86,9 @@ export default function RegisterPage() {
           <RegisterForm />
           
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-gray-400">
               Already have an account?{" "}
-              <Link href="/login" className="text-blue-600 dark:text-blue-400 hover:underline">
+              <Link href="/login" className="text-blue-400 hover:underline">
                 Sign in
               </Link>
             </p>
