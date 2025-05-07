@@ -7,3 +7,4 @@ migrations/__pycache__/
 venv/
 .vscode/
 
+core\db.sqlite3
