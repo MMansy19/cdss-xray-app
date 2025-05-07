@@ -108,9 +108,9 @@ const FinalDiagnosisCard: React.FC<DiagnosisProps> = ({ result }) => {
         <div className="mb-4">
           <h4 className="text-md font-medium mb-2">Treatment Suggestions</h4>
           <ul className="list-disc pl-5 space-y-1">
-            {treatmentSuggestions.map((suggestion, index) => (
+            {treatmentSuggestions.map((suggestion: string, index: number) => (
               <li key={index} className="text-gray-700 dark:text-gray-300">
-                {suggestion}
+              {suggestion}
               </li>
             ))}
           </ul>
@@ -148,8 +148,8 @@ const FinalDiagnosisCard: React.FC<DiagnosisProps> = ({ result }) => {
             <div>
               <span className="text-gray-500 dark:text-gray-400">BP:</span>
               <span className="ml-1 font-medium">
-                {vitals.systolicBP || vitals.bloodPressureSystolic}/
-                {vitals.diastolicBP || vitals.bloodPressureDiastolic} mmHg
+                {vitals.systolicBP}/
+                {vitals.diastolicBP} mmHg
               </span>
             </div>
             <div>
@@ -161,7 +161,7 @@ const FinalDiagnosisCard: React.FC<DiagnosisProps> = ({ result }) => {
               <span className="ml-1">
                 {[
                   vitals.hasCough ? 'Cough' : null,
-                  vitals.hasHeadaches || vitals.hasHeadache ? 'Headache' : null,
+                  vitals.hasHeadaches ? 'Headache' : null,
                   !vitals.canSmellTaste ? 'Loss of smell/taste' : null
                 ].filter(Boolean).join(', ') || 'None reported'}
               </span>
