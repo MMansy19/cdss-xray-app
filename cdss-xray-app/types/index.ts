@@ -96,6 +96,9 @@ export interface FinalDiagnosisResult {
     hasCough: boolean;
     hasHeadaches: boolean;
     canSmellTaste: boolean;
+    bloodPressureSystolic?: number;
+    bloodPressureDiastolic?: number;
+    hasHeadache?: boolean;
   };
   success?: boolean;
   error?: string;

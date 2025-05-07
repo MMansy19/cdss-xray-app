@@ -8,11 +8,11 @@ interface FinalDiagnosisCardProps {
 }
 
 const FinalDiagnosisCard: React.FC<FinalDiagnosisCardProps> = ({ result }) => {
-  // Handle both nested and flat result structures
-  const topPrediction = result.data?.topPrediction || result.topPrediction;
-  const severity = result.data?.severity || result.severity;
-  const diagnosisWithVitals = result.data?.diagnosisWithVitals || result.diagnosisWithVitals;
-  const treatmentSuggestions = result.data?.treatmentSuggestions || result.treatmentSuggestions || [];
+  // Extract data from result
+  const topPrediction = result.topPrediction;
+  const severity = result.severity;
+  const diagnosisWithVitals = result.diagnosisWithVitals;
+  const treatmentSuggestions = result.treatmentSuggestions || [];
   const vitals = result.vitals;
 
   // Safety check to prevent errors if data is missing

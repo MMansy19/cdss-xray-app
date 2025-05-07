@@ -155,7 +155,6 @@ const PatientVitalsForm: React.FC<PatientVitalsFormProps> = ({ onSubmit, isSubmi
                 <option value="">Select gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
-                <option value="other">Other</option>
               </select>
               {errors.gender && (
                 <p className="mt-1 text-sm text-red-500 flex items-center">
