@@ -20,10 +20,13 @@ const PredictionCard: React.FC<PredictionCardProps> = ({ result, className = '' 
     { label: '', confidence: 0 }
   );
   
+  // Ensure confidence is capped at 100% (1.0)
+  topPrediction.confidence = Math.min(topPrediction.confidence, 1.0);
+  
   // Format prediction data for the chart
   const chartData = diagnosisEntries.map(pred => ({
     name: pred.label,
-    confidence: Math.round(pred.confidence * 100),
+    confidence: Math.min(Math.round(pred.confidence * 100), 100)
   }));
 
   // Determine status color based on top prediction
@@ -76,7 +79,7 @@ const PredictionCard: React.FC<PredictionCardProps> = ({ result, className = '' 
             Confidence Level
           </span>
           <span className="text-lg font-bold">
-            {Math.round(topPrediction.confidence * 100)}%
+            {Math.min(Math.round(topPrediction.confidence * 100), 100) }%
           </span>
         </div>
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">

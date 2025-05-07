@@ -28,7 +28,9 @@ const AlertBanner: React.FC<AlertBannerProps> = ({
   
   if (!isVisible) return null;
   
-  const confidencePercentage = Math.round(confidence * 100);
+  const confidencePercentage = Math.min(Math.round(confidence * 100), 100);
+  
+  
   
   return (
     <div className={`fixed inset-x-0 top-24 z-50 flex justify-center px-4 pointer-events-none ${className}`}>

@@ -10,15 +10,15 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticatedUser, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     // Only redirect if authentication check is complete and user is not authenticated
-    if (!isLoading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticatedUser) {
       router.push('/login');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticatedUser, isLoading, router]);
 
   // Show loading indicator while checking authentication
   if (isLoading) {
@@ -33,7 +33,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   // Don't render children until authentication check is complete and user is authenticated
-  if (!isAuthenticated) {
+  if (!isAuthenticatedUser) {
     return null;
   }
 
