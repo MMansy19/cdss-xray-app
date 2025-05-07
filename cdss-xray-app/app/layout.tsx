@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import DemoModeToggle from "@/components/ui/DemoModeToggle";
 import { AuthProvider } from "@/hooks/useAuth";
 
 export const metadata: Metadata = {
@@ -50,6 +51,7 @@ export default function RootLayout({
         {/* Include ThemeToggle component to enforce dark mode on client-side */}
         <AuthProvider>
           <ThemeToggle />
+          <DemoModeToggle />
           <Navbar />
           <main className="flex-grow">
             {children}

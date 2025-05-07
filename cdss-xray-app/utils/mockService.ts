@@ -1,5 +1,5 @@
 import { AnalysisResult, PatientVitals } from '../types';
-import { shouldUseDemoMode } from './backendDetection';
+import { shouldUseDemoMode, isDemoModeForced } from './backendDetection';
 
 // Sample heatmap image as base64 string (replace with actual sample image)
 const sampleHeatmapBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
@@ -56,12 +56,21 @@ export const processMockVitals = (vitals: PatientVitals): AnalysisResult => {
 
 // Async version that uses the backend detection
 export const isDemoMode = async (): Promise<boolean> => {
+  // First check if demo mode has been manually forced
+  if (isDemoModeForced()) {
+    return true;
+  }
   return await shouldUseDemoMode();
 };
 
 // Synchronous version for places where async isn't suitable
 // This will use a simpler check without the backend availability test
 export const isDemoModeSync = (): boolean => {
+  // First check if demo mode has been manually forced
+  if (isDemoModeForced()) {
+    return true;
+  }
+  
   const configuredDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE;
   
   // If explicitly set to true, use demo mode

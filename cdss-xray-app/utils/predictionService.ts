@@ -1,5 +1,6 @@
 import { AnalysisResult, PatientVitals } from '../types';
-import { getMockAnalysisResult, processMockVitals, isDemoModeSync } from './mockService';
+import { getMockAnalysisResult, processMockVitals, isDemoModeSync, isDemoMode } from './mockService';
+import { forceEnableDemoMode } from './backendDetection';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
@@ -33,8 +34,9 @@ function getAuthTokens(): {access_token: string | null, refresh_token: string | 
 }
 
 export async function analyzeXray(image?: File, vitals?: PatientVitals): Promise<AnalysisResult> {
-  // Use mock data in demo mode
-  if (isDemoModeSync()) {
+  // Check if we should use demo mode
+  const demoMode = await isDemoMode();
+  if (demoMode) {
     console.log("Running in demo mode - using mock data for analysis");
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -77,11 +79,24 @@ export async function analyzeXray(image?: File, vitals?: PatientVitals): Promise
       console.warn('No access token found for authentication');
     }
 
+    // Use AbortController to handle timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
     const response = await fetch(`${API_BASE_URL}/upload-scan`, {
       method: 'POST',
       headers: headers,
       body: formData,
+      signal: controller.signal
+    }).catch(error => {
+      if (error.name === 'AbortError') {
+        console.error('Request timed out');
+        throw new Error('Backend request timed out. Switching to demo mode.');
+      }
+      throw error;
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -92,12 +107,37 @@ export async function analyzeXray(image?: File, vitals?: PatientVitals): Promise
     return await response.json();
   } catch (error) {
     console.error("Error analyzing data:", error);
+    
+    // Auto-enable demo mode if we get a backend error
+    if (error instanceof Error && (
+        error.message.includes('Failed to fetch') || 
+        error.message.includes('NetworkError') || 
+        error.message.includes('timed out') ||
+        error.message.includes('API error'))) {
+      console.log('Backend connection failed. Enabling demo mode for future requests.');
+      forceEnableDemoMode();
+      
+      // Return mock data since we couldn't connect to the backend
+      if (vitals) {
+        return processMockVitals(vitals);
+      } else {
+        return getMockAnalysisResult();
+      }
+    }
+    
     throw error;
   }
 }
 
 // Function to analyze without submitting results
 export async function analyzeOnly(image?: File): Promise<AnalysisResult> {
+  // Check if we should use demo mode
+  if (await isDemoMode()) {
+    console.log("Running in demo mode - using mock data for analysis");
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return getMockAnalysisResult();
+  }
+  
   try {
     const formData = new FormData();
     
@@ -118,11 +158,24 @@ export async function analyzeOnly(image?: File): Promise<AnalysisResult> {
       console.warn('No access token found for authentication');
     }
 
+    // Use AbortController to handle timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
     const response = await fetch(`${API_BASE_URL}/upload-scan`, {
       method: 'POST',
       headers: headers,
       body: formData,
+      signal: controller.signal
+    }).catch(error => {
+      if (error.name === 'AbortError') {
+        console.error('Request timed out');
+        throw new Error('Backend request timed out');
+      }
+      throw error;
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -133,6 +186,9 @@ export async function analyzeOnly(image?: File): Promise<AnalysisResult> {
     return await response.json();
   } catch (error) {
     console.error("Error analyzing data:", error);
+    console.log('Falling back to demo mode');
+    forceEnableDemoMode();
+    
     // Fallback to mock data
     return getMockAnalysisResult();
   }
@@ -146,22 +202,38 @@ export async function analyzeAndSubmit(image?: File, vitals?: PatientVitals): Pr
 // Keeping these functions for backward compatibility but redirecting to the unified function
 export async function analyzeXrayImage(image: File): Promise<AnalysisResult> {
   // Use mock data in demo mode
-  if (isDemoModeSync()) {
+  if (isDemoModeSync() || await isDemoMode()) {
     console.log("Running in demo mode - using mock data for analysis");
     await new Promise(resolve => setTimeout(resolve, 1000));
     return getMockAnalysisResult();
   }
   
-  throw new Error('Both image and vitals are required for analysis');
+  try {
+    return await analyzeOnly(image);
+  } catch (error) {
+    console.error("Error in analyzeXrayImage:", error);
+    forceEnableDemoMode();
+    return getMockAnalysisResult();
+  }
 }
 
 export async function analyzeWithVitals(imageId: string, vitals: PatientVitals): Promise<AnalysisResult> {
   // Use mock data in demo mode
-  if (isDemoModeSync()) {
+  if (isDemoModeSync() || await isDemoMode()) {
     console.log("Running in demo mode - using mock data for vitals analysis");
     await new Promise(resolve => setTimeout(resolve, 1000));
     return processMockVitals(vitals);
   }
   
-  throw new Error('Both image and vitals are required for analysis');
+  try {
+    // This would normally call the backend API with the image ID and vitals
+    // If no implementation exists, fall back to demo mode
+    console.error("API functionality not implemented, using mock data");
+    forceEnableDemoMode();
+    return processMockVitals(vitals);
+  } catch (error) {
+    console.error("Error in analyzeWithVitals:", error);
+    forceEnableDemoMode();
+    return processMockVitals(vitals);
+  }
 }
