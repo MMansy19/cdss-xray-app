@@ -58,34 +58,41 @@ export interface XRayImage {
   preview: string;
 }
 
-export interface PredictionResult {
-  topPrediction: {
-    label: string;
-    confidence: number;
-  };
-  predictions: {
-    label: string;
-    confidence: number;
-  }[];
-  heatmapUrl?: string;
+export interface Prediction {
+  label: string;
+  confidence: number;
+}
+
+export interface AnalysisResultData {
+  topPrediction: Prediction;
+  predictions: Prediction[];
+  heatmapUrl: string;
+  severity: "Low" | "Moderate" | "High";
+  diagnosisWithVitals?: string;
+  treatmentSuggestions?: string[];
+}
+
+export interface AnalysisResult {
+  success: boolean;
+  data: AnalysisResultData;
+  error?: string;
 }
 
 // Patient vitals types
 export interface PatientVitals {
   temperature: number;  // in Celsius
-  systolicBP: number;   // mmHg
-  diastolicBP: number;  // mmHg
+  bloodPressureSystolic: number;   // mmHg
+  bloodPressureDiastolic: number;  // mmHg
   heartRate: number;    // bpm
   hasCough: boolean;
-  hasHeadaches: boolean;
+  hasHeadache: boolean;
   canSmellTaste: boolean;
+  additionalNotes?: string;
 }
 
-export interface FinalDiagnosisResult extends PredictionResult {
-  diagnosisWithVitals?: string;
-  treatmentSuggestions?: string[];
-  severity?: 'Low' | 'Moderate' | 'High';
-  vitals?: PatientVitals;
+export interface TreatmentSuggestion {
+  type: string;
+  description: string;
 }
 
 // API response types

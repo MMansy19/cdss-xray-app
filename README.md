@@ -164,6 +164,20 @@ python manage.py runserver
 
 The backend API will be available at [http://localhost:8000](http://localhost:8000).
 
+### 4. Demo Mode Configuration
+
+The application can run in "demo mode" without a backend:
+
+- Set `NEXT_PUBLIC_DEMO_MODE=true` in your environment variables
+- This enables mock services for X-ray analysis and authentication
+- Perfect for frontend-only deployments on platforms like Vercel
+
+For Vercel deployment:
+1. Connect your GitHub repository
+2. Deploy the `cdss-xray-app` directory as the project root
+3. Add environment variable `NEXT_PUBLIC_DEMO_MODE=true`
+4. No additional configuration needed - mock data will be used
+
 ## 🏥 Clinical Workflow
 
 Our application follows a structured clinical workflow designed to enhance diagnostic accuracy:
