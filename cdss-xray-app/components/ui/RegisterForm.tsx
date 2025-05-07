@@ -48,15 +48,15 @@ const RegisterForm = () => {
     setIsLoading(true);
     
     // Simulate network delay for better UX feedback
-    setTimeout(() => {
-      const success = register(formData.username, formData.password, formData.name);
+    try {
+      const success = await register(formData.username, formData.password, formData.name);
       
       if (success) {
         router.push('/analyze');
       }
-      
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   };
 
   const displayError = validationError || error;
