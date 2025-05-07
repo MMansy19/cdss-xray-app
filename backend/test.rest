@@ -1,0 +1,34 @@
+# @name signup
+POST http://localhost:8000/auth/signup/
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "testpass123"
+}
+
+###
+
+# @name login
+POST http://localhost:8000/auth/login/
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "password": "testpass123"
+}
+
+###
+
+@access_token = {{login.response.body.access_token}}
+
+# @name profile
+GET http://localhost:8000/auth/profile/
+Authorization: Bearer {{access_token}}
+
+###
+
+# @name logout
+POST http://localhost:8000/auth/logout/
+Authorization: Bearer {{access_token}}

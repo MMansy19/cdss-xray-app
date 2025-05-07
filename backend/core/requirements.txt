@@ -10,12 +10,14 @@ colorama==0.4.6
 Django==5.2
 django-cors-headers==4.7.0
 djangorestframework==3.16.0
+djangorestframework_simplejwt==5.5.0
 drf-yasg==1.21.10
 inflection==0.5.1
 kombu==5.5.3
 packaging==25.0
 pillow==11.2.1
 prompt_toolkit==3.0.51
+PyJWT==2.9.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.0
 pytz==2025.2
