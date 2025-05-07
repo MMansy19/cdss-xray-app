@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from .knowledge_base import calculate
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from .model.model_predict import predict_pneumonia
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
@@ -23,6 +24,9 @@ def upload_scan(request):
         
         # Get image file
         image_file = request.FILES['image']
+
+        # Check if the patient has pneumonia
+        has_pneumonia = predict_pneumonia(image_file)
         
         # Calculate age from birthdate
         try:
@@ -67,7 +71,7 @@ def upload_scan(request):
                 'can_smell': request.data.get('canSmellTaste', 'true').lower() == 'true',
                 'age': float(age),  # Using calculated age
                 'gender': request.data.get('gender', 'female'),
-                'has_pneumonia': False
+                'has_pneumonia': has_pneumonia
             }
         except (ValueError, TypeError) as e:
             return Response(

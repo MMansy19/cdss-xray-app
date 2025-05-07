@@ -54,13 +54,13 @@ def calculate(systolic_pressure: int, diastolic_pressure: int, temperature: floa
         has_pneumonia: Whether patient already has pneumonia diagnosis
         
     Returns:
-        Dictionary with probabilities for each condition
+        Dictionary with probabilities for each condition (values between 0 and 1)
     """
     # Define thresholds for vital signs
     FEVER_THRESHOLD = 37.8  # Celsius
     ELEVATED_HR_THRESHOLD = 90  # bpm
     HIGH_SYSTOLIC_BP_THRESHOLD = 130  # mmHg
-    HIGH_DIASTOLIC_BP_THRESHOLD = 80  # mmHg
+    HIGH_DIASTOLIC_BP_THRESHOLD = 90  # mmHg
     
     # Determine observed symptoms/states based on parameters
     observed_symptoms = {
@@ -111,103 +111,10 @@ def calculate(systolic_pressure: int, diastolic_pressure: int, temperature: floa
         covid_given_pneumonia = 0.30  # P(Covid|Pneumonia)
         posteriors["Covid-19"] = max(posteriors["Covid-19"], covid_given_pneumonia)
     
-   
-    # Normalize probabilities to percentages and cap at 95%
-    covid_probability = min(0.95, posteriors["Covid-19"]) * 100
-    pneumonia_probability = min(0.95, posteriors["Pneumonia"]) * 100
+    covid_probability = min(0.95, posteriors["Covid-19"])
+    pneumonia_probability = min(0.95, posteriors["Pneumonia"])
     
     return {
         "Covid-19": round(covid_probability, 2),
         "Pneumonia": round(pneumonia_probability, 2),
     }
-
-def print_test_result(test_name, params, result):
-    """Helper to print test results in a structured way"""
-    print(f"\n=== {test_name} ===")
-    print(f"Parameters: {params}")
-    print(f"Results: {result}")
-    
-def run_tests():
-    """Run various test scenarios for the calculate function"""
-    
-    # Test Case 1: Healthy individual with normal vitals
-    params = {
-        "systolic_pressure": 120, 
-        "diastolic_pressure": 75,
-        "temperature": 36.8, 
-        "heart_rate": 72,
-        "has_cough": False, 
-        "has_headache": False, 
-        "can_smell": True,
-        "age": 35, 
-        "gender": "F", 
-        "has_pneumonia": False
-    }
-    result = calculate(**params)
-    print_test_result("Healthy Individual", params, result)
-    
-    # Test Case 2: COVID-19 typical presentation
-    params = {
-        "systolic_pressure": 135, 
-        "diastolic_pressure": 85,
-        "temperature": 38.5, 
-        "heart_rate": 95,
-        "has_cough": True, 
-        "has_headache": True, 
-        "can_smell": False,
-        "age": 45, 
-        "gender": "M", 
-        "has_pneumonia": False
-    }
-    result = calculate(**params)
-    print_test_result("COVID-19 Typical Presentation", params, result)
-    
-    # Test Case 3: Pneumonia typical presentation
-    params = {
-        "systolic_pressure": 125, 
-        "diastolic_pressure": 78,
-        "temperature": 39.0, 
-        "heart_rate": 110,
-        "has_cough": True, 
-        "has_headache": False, 
-        "can_smell": True,
-        "age": 68, 
-        "gender": "M", 
-        "has_pneumonia": True
-    }
-    result = calculate(**params)
-    print_test_result("Pneumonia Confirmed", params, result)
-    
-    # Test Case 4: Older patient with borderline vitals
-    params = {
-        "systolic_pressure": 145, 
-        "diastolic_pressure": 90,
-        "temperature": 37.9, 
-        "heart_rate": 92,
-        "has_cough": True, 
-        "has_headache": True, 
-        "can_smell": True,
-        "age": 75, 
-        "gender": "F", 
-        "has_pneumonia": False
-    }
-    result = calculate(**params)
-    print_test_result("Older Patient with Borderline Vitals", params, result)
-    
-    # Test Case 5: Both conditions likely
-    params = {
-        "systolic_pressure": 140, 
-        "diastolic_pressure": 88,
-        "temperature": 38.7, 
-        "heart_rate": 105,
-        "has_cough": True, 
-        "has_headache": True, 
-        "can_smell": False,
-        "age": 62, 
-        "gender": "M", 
-        "has_pneumonia": True
-    }
-    result = calculate(**params)
-    print_test_result("Likely Both Conditions", params, result)
-    
-# run_tests()
