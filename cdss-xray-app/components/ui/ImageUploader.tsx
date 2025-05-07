@@ -162,7 +162,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`w-full max-w-[600px] mx-auto ${className}`}>
       {!preview ? (
         <div
           {...getRootProps()}

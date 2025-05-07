@@ -11,6 +11,12 @@ interface User {
   name?: string;
 }
 
+// Define the token structure to match Django's JWT response
+interface AuthTokens {
+  access_token: string;
+  refresh_token: string;
+}
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
@@ -37,47 +43,75 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   
   // Check if user is logged in on mount and when localStorage changes
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
       try {
-        const token = localStorage.getItem('authToken');
+        // SafelyGet handles the case where localStorage might not be available yet
+        const safelyGet = (key: string): string | null => {
+          try {
+            return localStorage.getItem(key);
+          } catch (e) {
+            console.warn(`Error accessing localStorage for ${key}:`, e);
+            return null;
+          }
+        };
+
+        // SafelyParse handles JSON parsing errors gracefully
+        const safelyParse = <T extends unknown>(json: string | null): T | null => {
+          if (!json) return null;
+          try {
+            return JSON.parse(json) as T;
+          } catch (e) {
+            console.error("Error parsing JSON:", e);
+            return null;
+          }
+        };
         
-        if (!token) {
+        // Check for tokens in the new JWT format
+        const tokensString = safelyGet('authTokens');
+        if (tokensString) {
+          const tokens = safelyParse<AuthTokens>(tokensString);
+          if (tokens && tokens.access_token) {
+            // Tokens exist in the new format
+            const userDataString = safelyGet('userData');
+            const userData = safelyParse<User>(userDataString);
+            
+            if (userData && userData.id) {
+              setUser(userData);
+              setIsAuthenticated(true);
+              setLoading(false);
+              return;
+            }
+          }
+        }
+        
+        // Fall back to old token format
+        const legacyToken = safelyGet('authToken');
+        if (!legacyToken) {
           setUser(null);
           setIsAuthenticated(false);
           setLoading(false);
           return;
         }
         
-        // Instead of verifying with backend, restore from localStorage
-        try {
-          // Safely parse stored user data
-          const userDataString = localStorage.getItem('userData');
+        // Safely parse stored user data
+        const userDataString = safelyGet('userData');
+        const userData = safelyParse<User>(userDataString);
+        
+        if (userData && userData.id) {
+          setUser(userData);
+          setIsAuthenticated(true);
           
-          if (!userDataString) {
-            // No user data found, clear token and logout
-            localStorage.removeItem('authToken');
-            setUser(null);
-            setIsAuthenticated(false);
-            setLoading(false);
-            return;
+          // Migrate to new token format if using legacy format
+          if (legacyToken && !tokensString) {
+            localStorage.setItem('authTokens', JSON.stringify({
+              access_token: legacyToken,
+              refresh_token: legacyToken // Use same token as a fallback
+            }));
           }
-          
-          // Parse the user data
-          const userData = JSON.parse(userDataString);
-          
-          if (userData && userData.id) {
-            setUser(userData);
-            setIsAuthenticated(true);
-          } else {
-            // Invalid user data
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('userData');
-            setUser(null);
-            setIsAuthenticated(false);
-          }
-        } catch (e) {
-          console.error('Error parsing user data:', e);
+        } else {
+          // Invalid or missing user data
           localStorage.removeItem('authToken');
+          localStorage.removeItem('authTokens');
           localStorage.removeItem('userData');
           setUser(null);
           setIsAuthenticated(false);
@@ -94,11 +128,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Add a small delay to ensure localStorage is available (helps with Next.js hydration)
     const timer = setTimeout(() => {
       checkAuth();
-    }, 10);
+    }, 100);
     
     // Setup storage event listener to sync auth state across tabs
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'authToken' || e.key === 'userData') {
+      if (e.key === 'authToken' || e.key === 'authTokens' || e.key === 'userData') {
         checkAuth();
       }
     };
@@ -126,8 +160,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           name: username
         };
         
-        // Store auth data
-        localStorage.setItem('authToken', 'mock-token-for-demo-mode');
+        // Store auth data using new token format
+        const mockTokens = {
+          access_token: 'mock-access-token-for-demo-mode',
+          refresh_token: 'mock-refresh-token-for-demo-mode'
+        };
+        
+        localStorage.setItem('authTokens', JSON.stringify(mockTokens));
+        localStorage.setItem('authToken', mockTokens.access_token); // For backwards compatibility
         localStorage.setItem('userData', JSON.stringify(mockUser));
         setUser(mockUser);
         setIsAuthenticated(true);
@@ -155,16 +195,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const data = await response.json();
       
       if (response.ok) {
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('userData', JSON.stringify(data.user));
-        setUser(data.user);
-        setIsAuthenticated(true);
-        return true;
+          // Store both token formats
+          if (data.access_token && data.refresh_token) {
+            // New JWT format
+            localStorage.setItem('authTokens', JSON.stringify({
+              access_token: data.access_token,
+              refresh_token: data.refresh_token
+            }));
+            localStorage.setItem('authToken', data.access_token); // For backwards compatibility
+          } else if (data.token) {
+            // Old token format
+            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('authTokens', JSON.stringify({
+              access_token: data.token,
+              refresh_token: data.token // Use same token as a fallback
+            }));
+          } else {
+            throw new Error('No token in response');
+          }
+          
+          localStorage.setItem('userData', JSON.stringify(data.user));
+          setUser(data.user);
+          setIsAuthenticated(true);
+          return true;
+        } else {
+          console.error('Login response missing token or user data:', data);
+          setError(data.detail || 'Invalid credentials');
+          return false;
       }
       
-      setError(data.message || 'Invalid username or password');
-      setIsAuthenticated(false);
-      return false;
     } catch (error) {
       console.error('Login error:', error);
       setError('Connection error. Please try again.');
@@ -190,8 +249,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           name: username
         };
         
-        // Store auth data
-        localStorage.setItem('authToken', 'mock-token-for-demo-mode');
+        // Store auth data using new token format
+        const mockTokens = {
+          access_token: 'mock-access-token-for-demo-mode',
+          refresh_token: 'mock-refresh-token-for-demo-mode'
+        };
+        
+        localStorage.setItem('authTokens', JSON.stringify(mockTokens));
+        localStorage.setItem('authToken', mockTokens.access_token); // For backwards compatibility
         localStorage.setItem('userData', JSON.stringify(mockUser));
         setUser(mockUser);
         setIsAuthenticated(true);
@@ -219,15 +284,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const data = await response.json();
       
       if (response.ok) {
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('userData', JSON.stringify(data.user));
-        setUser(data.user);
-        setIsAuthenticated(true);
-        return true;
+          // Store both token formats
+          if (data.access_token && data.refresh_token) {
+            // New JWT format
+            localStorage.setItem('authTokens', JSON.stringify({
+              access_token: data.access_token,
+              refresh_token: data.refresh_token
+            }));
+            localStorage.setItem('authToken', data.access_token); // For backwards compatibility
+          } else if (data.token) {
+            // Old token format
+            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('authTokens', JSON.stringify({
+              access_token: data.token,
+              refresh_token: data.token // Use same token as a fallback
+            }));
+          } else {
+            router.push('/login');
+            throw new Error('No token in response');
+          }
+          
+          localStorage.setItem('userData', JSON.stringify(data.user));
+          setUser(data.user);
+          setIsAuthenticated(true);
+          return true;
+        } else {
+          console.error('Registration response missing token or user data:', data);
+          setError(data.username?.[0] || data.email?.[0] || data.password?.[0] || 'Registration failed');
+          return false;
       }
       
-      setError(data.message || 'Registration failed');
-      return false;
     } catch (error) {
       console.error('Registration error:', error);
       setError('Connection error. Please try again.');
@@ -241,6 +327,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     // Clear all auth-related storage
     localStorage.removeItem('authToken');
+    localStorage.removeItem('authTokens');
     localStorage.removeItem('userData');
     // Reset user state
     setUser(null);

@@ -1,19 +1,27 @@
 'use client';
 
-import { AnalysisResult } from '@/types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { AlertTriangle, CheckCircle, Info } from 'lucide-react';
 
 interface PredictionCardProps {
-  result: AnalysisResult;
+  result: Record<string, number>;
   className?: string;
 }
 
 const PredictionCard: React.FC<PredictionCardProps> = ({ result, className = '' }) => {
-  const { topPrediction, predictions } = result.data;
+  // Extract diagnosis entries (exclude non-diagnosis fields like age)
+  const diagnosisEntries = Object.entries(result)
+    .filter(([key]) => !['age'].includes(key))
+    .map(([label, confidence]) => ({ label, confidence }));
+  
+  // Find the top prediction (highest confidence)
+  const topPrediction = diagnosisEntries.reduce(
+    (max, current) => current.confidence > max.confidence ? current : max, 
+    { label: '', confidence: 0 }
+  );
   
   // Format prediction data for the chart
-  const chartData = predictions.map(pred => ({
+  const chartData = diagnosisEntries.map(pred => ({
     name: pred.label,
     confidence: Math.round(pred.confidence * 100),
   }));
@@ -40,6 +48,19 @@ const PredictionCard: React.FC<PredictionCardProps> = ({ result, className = '' 
     return <Info className="h-6 w-6 text-yellow-500 dark:text-yellow-400" />;
   };
 
+  // If no predictions are available
+  if (diagnosisEntries.length === 0) {
+    return (
+      <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 ${className}`}>
+        <div className="flex items-center mb-4">
+          <Info className="h-6 w-6 text-blue-500" />
+          <h3 className="text-xl font-bold ml-2">No predictions available</h3>
+        </div>
+        <p className="text-gray-500 dark:text-gray-400">Unable to generate predictions from the provided data.</p>
+      </div>
+    );
+  }
+
   return (
     <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 ${className}`}>
       <div className="flex items-center mb-4">
@@ -61,7 +82,7 @@ const PredictionCard: React.FC<PredictionCardProps> = ({ result, className = '' 
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
           <div 
             className="h-2.5 rounded-full bg-blue-600" 
-            style={{ width: `${Math.round(topPrediction.confidence * 100)}%` }}
+            style={{ width: `${Math.min(Math.round(topPrediction.confidence * 100), 100) }%` }}
           ></div>
         </div>
       </div>
@@ -92,8 +113,17 @@ const PredictionCard: React.FC<PredictionCardProps> = ({ result, className = '' 
           </ResponsiveContainer>
         </div>
       </div>
+      
+      {result.age && (
+        <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+          <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+            Patient Age
+          </h4>
+          <p className="text-lg font-bold">{result.age} years</p>
+        </div>
+      )}
     </div>
   );
-};
+}
 
-export default PredictionCard;
+export default PredictionCard;    

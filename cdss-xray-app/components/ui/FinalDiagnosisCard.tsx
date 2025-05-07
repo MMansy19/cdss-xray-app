@@ -1,22 +1,47 @@
 'use client';
 
-import { FinalDiagnosisResult } from '@/types';
 import { ClipboardCheck, AlertTriangle, AlertOctagon } from 'lucide-react';
+import { PatientVitals } from '@/types';
 
-interface FinalDiagnosisCardProps {
-  result: FinalDiagnosisResult;
+interface DiagnosisProps {
+  result: Record<string, any>;
 }
 
-const FinalDiagnosisCard: React.FC<FinalDiagnosisCardProps> = ({ result }) => {
-  // Extract data from result
-  const topPrediction = result.topPrediction;
-  const severity = result.severity;
-  const diagnosisWithVitals = result.diagnosisWithVitals;
+const FinalDiagnosisCard: React.FC<DiagnosisProps> = ({ result }) => {
+  // Extract diagnosis entries (exclude non-diagnosis fields like age)
+  const diagnosisEntries = Object.entries(result)
+    .filter(([key]) => !['age', 'severity', 'diagnosisWithVitals', 'treatmentSuggestions', 'vitals'].includes(key))
+    .map(([label, confidence]) => ({ label, confidence: Number(confidence) }));
+  
+  // Find the top prediction (highest confidence)
+  const topPrediction = diagnosisEntries.reduce(
+    (max, current) => current.confidence > max.confidence ? current : max, 
+    { label: '', confidence: 0 }
+  );
+
+  // Extract other fields
+  const severity = result.severity || getSeverity(topPrediction.label, topPrediction.confidence);
+  const diagnosisWithVitals = result.diagnosisWithVitals || '';
   const treatmentSuggestions = result.treatmentSuggestions || [];
-  const vitals = result.vitals;
+  const vitals = result.vitals as PatientVitals | undefined;
+
+  // Helper function to determine severity if not provided in the result
+  function getSeverity(label: string, confidence: number): string {
+    const lowercaseLabel = label.toLowerCase();
+    
+    if (['covid-19', 'pneumonia'].includes(lowercaseLabel)) {
+      return confidence > 0.6 ? 'High' : 'Moderate';
+    } else if (['tuberculosis', 'lung cancer'].includes(lowercaseLabel)) {
+      return 'High';
+    } else if (lowercaseLabel === 'normal') {
+      return 'Low';
+    }
+    
+    return 'Moderate';
+  }
 
   // Safety check to prevent errors if data is missing
-  if (!topPrediction || !severity) {
+  if (!topPrediction || !topPrediction.label) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 animate-fadeIn">
         <div className="flex items-center justify-between mb-4">
@@ -74,7 +99,7 @@ const FinalDiagnosisCard: React.FC<FinalDiagnosisCardProps> = ({ result }) => {
           </span>
         </div>
         <p className="text-gray-700 dark:text-gray-300">
-          {diagnosisWithVitals || 'No additional insights from vitals data.'}
+          {diagnosisWithVitals || `Based on the X-ray image and any available patient data, the primary diagnosis appears to be ${topPrediction.label}.`}
         </p>
       </div>
 
