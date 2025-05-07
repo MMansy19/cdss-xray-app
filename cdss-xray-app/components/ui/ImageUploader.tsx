@@ -4,7 +4,17 @@ import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { XRayImage, UploadProgressData } from '@/utils/imageUploadService';
+
+interface XRayImage {
+  file: File;
+  preview: string;
+}
+
+interface UploadProgressData {
+  progress: number;
+  status: 'idle' | 'uploading' | 'processing' | 'complete' | 'error';
+  message?: string;
+}
 
 interface ImageUploaderProps {
   onImageSelect: (image: XRayImage | null) => void;
@@ -74,12 +84,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     onImageSelect(image);
 
     // Auto upload if enabled
-    if (autoUpload && isAuthenticatedUser {
+    if (autoUpload && isAuthenticatedUser) {
       handleUpload(image);
     }
 
     // Clean up function not needed here as we'll handle it in clearImage
-  }, [onImageSelect, autoUpload, isAuthenticatedUser maxSizeMB]);
+  }, [onImageSelect, autoUpload, isAuthenticatedUser, maxSizeMB]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -106,7 +116,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   const handleUpload = async (image: XRayImage) => {
-    if (!isAuthenticatedUser {
+    if (!isAuthenticatedUser || disabled) {
       setError('You must be logged in to upload images');
       return;
     }
