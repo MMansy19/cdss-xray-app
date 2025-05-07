@@ -9,12 +9,12 @@ import HeatmapViewer from '@/components/ui/HeatmapViewer';
 import RuleBasedAdvice from '@/components/ui/RuleBasedAdvice';
 import PatientVitalsForm from '@/components/ui/PatientVitalsForm';
 import FinalDiagnosisCard from '@/components/ui/FinalDiagnosisCard';
-import { FinalDiagnosisResult, PatientVitals, PredictionResult } from '@/types';
+import { FinalDiagnosisResult, PatientVitals, AnalysisResult } from '@/types';
 import { ArrowLeft, Download, ChevronDown, ChevronUp } from 'lucide-react';
-import { submitVitalsForAnalysis } from '@/utils/predictionService';
+import { analyzeWithVitals } from '@/utils/predictionService';
 
 export default function ResultPage() {
-  const [result, setResult] = useState<PredictionResult | null>(null);
+  const [result, setResult] = useState<AnalysisResult | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmittingVitals, setIsSubmittingVitals] = useState<boolean>(false);
@@ -52,11 +52,10 @@ export default function ResultPage() {
     setError(null);
     
     try {
-      const enhancedResult = await submitVitalsForAnalysis(
-        result,
-        originalImageUrl,
-        vitals
-      );
+      // Using the imageId from result object (assuming it exists) or using a hardcoded value as fallback
+      const imageId = (result as any)?.data?.imageId || 'temp-image-id';
+      
+      const enhancedResult = await analyzeWithVitals(imageId, vitals);
       
       setFinalResult(enhancedResult);
       setShowVitalsForm(false); // Collapse form after successful submission
@@ -146,7 +145,7 @@ export default function ResultPage() {
             <h2 className="text-xl font-semibold mb-4">X-Ray Image</h2>
             <HeatmapViewer 
               originalImageUrl={originalImageUrl} 
-              heatmapUrl={result.heatmapUrl}
+              heatmapUrl={result.data?.heatmapUrl || ''}
               className="aspect-square w-full"
             />
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 italic">

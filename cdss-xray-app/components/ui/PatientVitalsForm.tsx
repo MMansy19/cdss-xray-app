@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { PatientVitals } from '@/types';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Calendar, Users } from 'lucide-react';
 
 interface PatientVitalsFormProps {
   onSubmit: (vitals: PatientVitals) => void;
@@ -15,6 +15,8 @@ const PatientVitalsForm: React.FC<PatientVitalsFormProps> = ({ onSubmit, isSubmi
     systolicBP: 120,
     diastolicBP: 80,
     heartRate: 75,
+    birthdate: '',
+    gender: '',
     hasCough: false,
     hasHeadaches: false,
     canSmellTaste: true,
@@ -44,17 +46,50 @@ const PatientVitalsForm: React.FC<PatientVitalsFormProps> = ({ onSubmit, isSubmi
       newErrors.heartRate = 'Heart rate should be between 40-220 bpm';
     }
     
+    // Birthdate validation
+    if (!formData.birthdate) {
+      newErrors.birthdate = 'Birthdate is required';
+    } else {
+      // Check if date is valid and not in the future
+      const birthdateObj = new Date(formData.birthdate);
+      const today = new Date();
+      if (isNaN(birthdateObj.getTime())) {
+        newErrors.birthdate = 'Invalid date format';
+      } else if (birthdateObj > today) {
+        newErrors.birthdate = 'Birthdate cannot be in the future';
+      } else if (birthdateObj.getFullYear() < 1900) {
+        newErrors.birthdate = 'Birthdate year must be after 1900';
+      }
+    }
+    
+    // Gender validation
+    if (!formData.gender) {
+      newErrors.gender = 'Please select a gender';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
     
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : Number(value)
-    }));
+    if ((e.target as HTMLInputElement).type === 'checkbox') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: (e.target as HTMLInputElement).checked
+      }));
+    } else if (type === 'number') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: Number(value)
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -67,6 +102,72 @@ const PatientVitalsForm: React.FC<PatientVitalsFormProps> = ({ onSubmit, isSubmi
 
   return (
     <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-2">Patient Information</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="birthdate" className="block text-sm font-medium mb-1">
+              Birthdate
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Calendar className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                type="date"
+                id="birthdate"
+                name="birthdate"
+                value={formData.birthdate}
+                onChange={handleInputChange}
+                className={`w-full p-2 pl-10 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:border-gray-600 ${
+                  errors.birthdate ? 'border-red-500' : 'border-gray-300'
+                }`}
+                max={new Date().toISOString().split('T')[0]}
+                disabled={isSubmitting}
+              />
+              {errors.birthdate && (
+                <p className="mt-1 text-sm text-red-500 flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-1" />
+                  {errors.birthdate}
+                </p>
+              )}
+            </div>
+          </div>
+          
+          <div>
+            <label htmlFor="gender" className="block text-sm font-medium mb-1">
+              Gender
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Users className="h-4 w-4 text-gray-400" />
+              </div>
+              <select
+                id="gender"
+                name="gender"
+                value={formData.gender}
+                onChange={handleInputChange}
+                className={`w-full p-2 pl-10 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:border-gray-600 ${
+                  errors.gender ? 'border-red-500' : 'border-gray-300'
+                }`}
+                disabled={isSubmitting}
+              >
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+              {errors.gender && (
+                <p className="mt-1 text-sm text-red-500 flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-1" />
+                  {errors.gender}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <div className="mb-6">
         <h3 className="text-lg font-semibold mb-2">Numeric Vitals</h3>
         <div className="grid md:grid-cols-2 gap-4">

@@ -1,16 +1,16 @@
 'use client';
 
-import { PredictionResult } from '@/types';
+import { AnalysisResult } from '@/types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { AlertTriangle, CheckCircle, Info } from 'lucide-react';
 
 interface PredictionCardProps {
-  result: PredictionResult;
+  result: AnalysisResult;
   className?: string;
 }
 
 const PredictionCard: React.FC<PredictionCardProps> = ({ result, className = '' }) => {
-  const { topPrediction, predictions } = result;
+  const { topPrediction, predictions } = result.data;
   
   // Format prediction data for the chart
   const chartData = predictions.map(pred => ({

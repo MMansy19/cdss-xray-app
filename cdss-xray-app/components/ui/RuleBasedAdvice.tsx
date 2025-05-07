@@ -1,15 +1,15 @@
 'use client';
 
-import { PredictionResult } from '@/types';
+import { AnalysisResult } from '@/types';
 import { AlertTriangle, BookOpen, Stethoscope } from 'lucide-react';
 
 interface RuleBasedAdviceProps {
-  result: PredictionResult;
+  result: AnalysisResult;
   className?: string;
 }
 
 const RuleBasedAdvice: React.FC<RuleBasedAdviceProps> = ({ result, className = '' }) => {
-  const { topPrediction, predictions } = result;
+  const { topPrediction, predictions } = result.data;
   
   // Get appropriate advice based on top prediction and confidence level
   const getAdvice = () => {

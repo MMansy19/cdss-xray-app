@@ -24,7 +24,23 @@ export default function LoginPage() {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="flex flex-col items-center">
-          <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />
+          <div className="h-10 w-10 text-blue-500">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={24}
+              height={24}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-10 w-10 text-blue-500 animate-spin"
+              aria-hidden="true"
+            >
+              <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+            </svg>
+          </div>
           <p className="mt-4 text-gray-400">Loading...</p>
         </div>
       </div>
@@ -95,16 +111,6 @@ export default function LoginPage() {
                 <Link href="/register" className="text-blue-400 hover:underline font-medium">
                   Create an account
                 </Link>
-              </p>
-            </div>
-            
-            <div className="mt-8 text-center">
-              <p className="text-sm text-gray-400">
-                Demo credentials:
-                <br />
-                Username: <span className="font-mono text-blue-300">doctor1</span>, Password: <span className="font-mono text-blue-300">pass123</span>
-                <br />
-                Username: <span className="font-mono text-blue-300">admin</span>, Password: <span className="font-mono text-blue-300">admin123</span>
               </p>
             </div>
           </div>

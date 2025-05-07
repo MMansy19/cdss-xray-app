@@ -78,14 +78,39 @@ export interface AnalysisResult {
   error?: string;
 }
 
+// Enhanced diagnosis with vitals
+export interface FinalDiagnosisResult {
+  topPrediction: Prediction;
+  predictions?: Prediction[];
+  heatmapUrl?: string;
+  severity: "Low" | "Moderate" | "High";
+  diagnosisWithVitals: string;
+  treatmentSuggestions: string[];
+  vitals?: {
+    temperature: number;
+    systolicBP: number;
+    diastolicBP: number;
+    heartRate: number;
+    birthdate?: string;
+    gender?: string;
+    hasCough: boolean;
+    hasHeadaches: boolean;
+    canSmellTaste: boolean;
+  };
+  success?: boolean;
+  error?: string;
+}
+
 // Patient vitals types
 export interface PatientVitals {
   temperature: number;  // in Celsius
-  bloodPressureSystolic: number;   // mmHg
-  bloodPressureDiastolic: number;  // mmHg
+  systolicBP: number;   // mmHg
+  diastolicBP: number;  // mmHg
   heartRate: number;    // bpm
+  birthdate: string;    // YYYY-MM-DD format
+  gender: string;       // 'male', 'female', 'other'
   hasCough: boolean;
-  hasHeadache: boolean;
+  hasHeadaches: boolean;
   canSmellTaste: boolean;
   additionalNotes?: string;
 }
@@ -113,3 +138,4 @@ export interface PredictionResponse {
   }[];
   heatmap?: string; // base64 encoded image
 }
+

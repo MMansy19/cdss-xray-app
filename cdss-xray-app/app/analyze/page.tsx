@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ImageUploader from '@/components/ui/ImageUploader';
-import { XRayImage, PredictionResult } from '@/types';
-import { analyzePrediction } from '@/utils/predictionService';
+import { XRayImage, AnalysisResult } from '@/types';
+import { analyzeXrayImage } from '@/utils/predictionService';
 import { ArrowRight, Loader2 } from 'lucide-react';
 
 export default function AnalyzePage() {
@@ -29,7 +29,7 @@ export default function AnalyzePage() {
     setIsAnalyzing(true);
 
     try {
-      const result = await analyzePrediction(image);
+      const result = await analyzeXrayImage(image.file);
       
       // Store result in sessionStorage for the result page
       sessionStorage.setItem('xrayResult', JSON.stringify(result));

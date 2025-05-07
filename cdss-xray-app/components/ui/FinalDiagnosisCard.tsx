@@ -8,9 +8,30 @@ interface FinalDiagnosisCardProps {
 }
 
 const FinalDiagnosisCard: React.FC<FinalDiagnosisCardProps> = ({ result }) => {
+  // Handle both nested and flat result structures
+  const topPrediction = result.data?.topPrediction || result.topPrediction;
+  const severity = result.data?.severity || result.severity;
+  const diagnosisWithVitals = result.data?.diagnosisWithVitals || result.diagnosisWithVitals;
+  const treatmentSuggestions = result.data?.treatmentSuggestions || result.treatmentSuggestions || [];
+  const vitals = result.vitals;
+
+  // Safety check to prevent errors if data is missing
+  if (!topPrediction || !severity) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 animate-fadeIn">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-semibold">Final Diagnosis</h3>
+        </div>
+        <p className="text-gray-700 dark:text-gray-300">
+          Insufficient data to display final diagnosis. Please try again.
+        </p>
+      </div>
+    );
+  }
+
   // Severity badge color
   const getSeverityColor = () => {
-    switch (result.severity) {
+    switch (severity) {
       case 'High':
         return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
       case 'Moderate':
@@ -24,7 +45,7 @@ const FinalDiagnosisCard: React.FC<FinalDiagnosisCardProps> = ({ result }) => {
 
   // Severity icon
   const getSeverityIcon = () => {
-    switch (result.severity) {
+    switch (severity) {
       case 'High':
         return <AlertOctagon className="h-5 w-5 mr-1" />;
       case 'Moderate':
@@ -38,33 +59,31 @@ const FinalDiagnosisCard: React.FC<FinalDiagnosisCardProps> = ({ result }) => {
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 animate-fadeIn">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-semibold">Final Diagnosis</h3>
-        {result.severity && (
-          <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${getSeverityColor()}`}>
-            {getSeverityIcon()}
-            {result.severity} Severity
-          </div>
-        )}
+        <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${getSeverityColor()}`}>
+          {getSeverityIcon()}
+          {severity} Severity
+        </div>
       </div>
 
       {/* Main diagnosis */}
       <div className="mb-4">
         <div className="text-lg font-medium mb-1">
-          {result.topPrediction.label} 
+          {topPrediction.label} 
           <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">
-            ({(result.topPrediction.confidence * 100).toFixed(1)}% confidence)
+            ({(topPrediction.confidence * 100).toFixed(1)}% confidence)
           </span>
         </div>
         <p className="text-gray-700 dark:text-gray-300">
-          {result.diagnosisWithVitals || 'No additional insights from vitals data.'}
+          {diagnosisWithVitals || 'No additional insights from vitals data.'}
         </p>
       </div>
 
       {/* Treatment suggestions */}
-      {result.treatmentSuggestions && result.treatmentSuggestions.length > 0 && (
+      {treatmentSuggestions.length > 0 && (
         <div className="mb-4">
           <h4 className="text-md font-medium mb-2">Treatment Suggestions</h4>
           <ul className="list-disc pl-5 space-y-1">
-            {result.treatmentSuggestions.map((suggestion, index) => (
+            {treatmentSuggestions.map((suggestion, index) => (
               <li key={index} className="text-gray-700 dark:text-gray-300">
                 {suggestion}
               </li>
@@ -74,29 +93,51 @@ const FinalDiagnosisCard: React.FC<FinalDiagnosisCardProps> = ({ result }) => {
       )}
 
       {/* Vitals summary */}
-      {result.vitals && (
+      {vitals && (
         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
           <h4 className="text-md font-medium mb-2">Patient Vitals Summary</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm mb-3">
+            {/* Patient Information */}
+            {vitals.birthdate && (
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Birthdate:</span>
+                <span className="ml-1 font-medium">
+                  {new Date(vitals.birthdate).toLocaleDateString()}
+                </span>
+              </div>
+            )}
+            {vitals.gender && (
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Gender:</span>
+                <span className="ml-1 font-medium">
+                  {vitals.gender.charAt(0).toUpperCase() + vitals.gender.slice(1)}
+                </span>
+              </div>
+            )}
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
             <div>
               <span className="text-gray-500 dark:text-gray-400">Temperature:</span>
-              <span className="ml-1 font-medium">{result.vitals.temperature}°C</span>
+              <span className="ml-1 font-medium">{vitals.temperature}°C</span>
             </div>
             <div>
               <span className="text-gray-500 dark:text-gray-400">BP:</span>
-              <span className="ml-1 font-medium">{result.vitals.systolicBP}/{result.vitals.diastolicBP} mmHg</span>
+              <span className="ml-1 font-medium">
+                {vitals.systolicBP || vitals.bloodPressureSystolic}/
+                {vitals.diastolicBP || vitals.bloodPressureDiastolic} mmHg
+              </span>
             </div>
             <div>
               <span className="text-gray-500 dark:text-gray-400">Heart Rate:</span>
-              <span className="ml-1 font-medium">{result.vitals.heartRate} bpm</span>
+              <span className="ml-1 font-medium">{vitals.heartRate} bpm</span>
             </div>
             <div>
               <span className="text-gray-500 dark:text-gray-400">Symptoms:</span>
               <span className="ml-1">
                 {[
-                  result.vitals.hasCough ? 'Cough' : null,
-                  result.vitals.hasHeadaches ? 'Headache' : null,
-                  !result.vitals.canSmellTaste ? 'Loss of smell/taste' : null
+                  vitals.hasCough ? 'Cough' : null,
+                  vitals.hasHeadaches || vitals.hasHeadache ? 'Headache' : null,
+                  !vitals.canSmellTaste ? 'Loss of smell/taste' : null
                 ].filter(Boolean).join(', ') || 'None reported'}
               </span>
             </div>
