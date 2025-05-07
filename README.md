@@ -5,9 +5,12 @@
 ![React](https://img.shields.io/badge/React-19.0-blue)
 ![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.0-blue)
 
+## [Live Demo](https://cdss-xray-app.vercel.app)
+
+
 A Clinical Decision Support System (CDSS) web application that enables healthcare professionals to upload chest X-ray images and receive AI-powered diagnostic suggestions. This application bridges the gap between modern web technology (Next.js + Tailwind CSS) and advanced medical image processing capabilities, offering a seamless user experience with reliable diagnostic support.
 
-![App Screenshot](cdss-xray-app/public/logo2.png)
+![App Screenshot](frontend/public/logo2.png)
 
 ## 📋 Table of Contents
 - [Features](#-features)
