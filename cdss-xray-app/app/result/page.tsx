@@ -9,6 +9,8 @@ import HeatmapViewer from '@/components/ui/HeatmapViewer';
 import RuleBasedAdvice from '@/components/ui/RuleBasedAdvice';
 import AlertBanner from '@/components/ui/AlertBanner';
 import { ArrowLeft, Download } from 'lucide-react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 // Threshold for high-risk alerts (70%)
 const HIGH_RISK_THRESHOLD = 0.7;
@@ -20,6 +22,7 @@ export default function ResultPage() {
   const [originalImageUrl, setOriginalImageUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [highRiskCondition, setHighRiskCondition] = useState<{ name: string; confidence: number } | null>(null);
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const router = useRouter();
 
   // Load results from sessionStorage on mount
@@ -90,12 +93,122 @@ export default function ResultPage() {
     return processedData;
   };
 
-  // Handle PDF download (mock functionality)
-  const handleDownloadReport = () => {
-    // In a real app, this would generate a PDF report
-    alert('PDF download functionality would be implemented here.');
+  // Generate and download PDF report
+  const handleDownloadReport = async () => {
+    try {
+      setIsDownloading(true);
+      
+      // Create new PDF document
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // Report header
+      doc.setFontSize(22);
+      doc.setTextColor(44, 62, 80);
+      doc.text('X-Ray Analysis Report', 20, 20);
+      doc.setDrawColor(41, 128, 185);
+      doc.setLineWidth(0.5);
+      doc.line(20, 25, 190, 25);
+      
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      
+      // Date & Time
+      const now = new Date();
+      doc.text(`Generated: ${now.toLocaleString()}`, 20, 35);
+      
+      // Capture the X-ray image
+      const reportElement = document.getElementById('report-container');
+      const imageElement = document.getElementById('xray-image');
+      
+      if (imageElement) {
+        const canvas = await html2canvas(imageElement, {
+          scale: 2,
+          logging: false,
+          useCORS: true,
+        });
+        
+        // Add the image to the PDF
+        const imageData = canvas.toDataURL('image/jpeg', 0.8);
+        doc.addImage(imageData, 'JPEG', 20, 45, 80, 80);
+        
+        // Add diagnosis info
+        doc.setFontSize(16);
+        doc.setTextColor(44, 62, 80);
+        doc.text('Diagnosis Results', 110, 55);
+        
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100);
+        
+        let y = 65;
+        
+        // Display top conditions sorted by confidence
+        const sortedConditions = Object.entries(result || {})
+          .filter(([key]) => !['age'].includes(key))
+          .sort(([, a], [, b]) => b - a)
+          .slice(0, 3);
+        
+        sortedConditions.forEach(([condition, confidence], i) => {
+          doc.setTextColor(i === 0 ? 41 : 100, i === 0 ? 128 : 100, i === 0 ? 185 : 100);
+          doc.setFontSize(i === 0 ? 14 : 12);
+          doc.text(`${condition}: ${Math.round(confidence * 100)}%`, 110, y);
+          y += 10;
+        });
+        
+        // Clinical recommendations
+        doc.setFontSize(16);
+        doc.setTextColor(44, 62, 80);
+        doc.text('Clinical Recommendations', 20, 140);
+        
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100);
+        
+        // Get the top prediction
+        const topPrediction = sortedConditions[0];
+        if (topPrediction) {
+          const [condition, confidence] = topPrediction;
+          
+          // Add condition-specific advice
+          y = 150;
+          let advice = '';
+          
+          if (condition.toLowerCase().includes('covid')) {
+            advice = 'Consider COVID-19 protocol. Recommend RT-PCR testing for confirmation. ' + 
+                     'If positive, evaluate for supplemental oxygen needs and monitor for clinical deterioration.';
+          } else if (condition.toLowerCase().includes('pneumonia')) {
+            advice = 'Bacterial pneumonia suspected. Consider antibiotic therapy based on local guidelines. ' +
+                     'Evaluate respiratory status and consider sputum culture if available.';
+          } else if (condition.toLowerCase() === 'normal') {
+            advice = 'No significant radiographic abnormalities detected. Correlate with clinical presentation.';
+          } else {
+            advice = 'Findings suggest abnormality that may require further investigation. ' +
+                     'Consider specialist consultation or additional imaging studies.';
+          }
+          
+          // Apply text wrapping for the advice
+          const splitText = doc.splitTextToSize(advice, 170);
+          doc.text(splitText, 20, y);
+        }
+        
+        // Disclaimer
+        doc.setFontSize(10);
+        doc.setTextColor(150, 150, 150);
+        doc.text('DISCLAIMER: This is an AI-assisted analysis and should be used as a clinical decision support tool only.', 20, 270);
+        doc.text('Always correlate with clinical findings and seek specialist consultation as appropriate.', 20, 275);
+        
+        // Download the PDF
+        doc.save(`xray-analysis-${now.toISOString().split('T')[0]}.pdf`);
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF report. Please try again.');
+    } finally {
+      setIsDownloading(false);
+    }
   };
-
 
   if (isLoading) {
     return (
@@ -138,7 +251,7 @@ export default function ResultPage() {
         />
       )}
       
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div id="report-container" className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-bold mb-2">X-Ray Analysis Results</h1>
@@ -156,10 +269,11 @@ export default function ResultPage() {
             </Link>
             <button
               onClick={handleDownloadReport}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+              disabled={isDownloading}
+              className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download className="mr-2 h-4 w-4" />
-              Download Report
+              {isDownloading ? 'Generating...' : 'Download Report'}
             </button>
           </div>
         </div>
@@ -168,11 +282,13 @@ export default function ResultPage() {
           {/* Left column - Image with enhanced heatmap */}
           <div>
             <h2 className="text-xl font-semibold mb-4">X-Ray Image</h2>
-            <HeatmapViewer 
-              originalImageUrl={originalImageUrl} 
-              heatmapUrl={Object.values(result).some(value => value > 0.01) ? originalImageUrl : undefined}
-              className="aspect-square w-full"
-            />
+            <div id="xray-image">
+              <HeatmapViewer 
+                originalImageUrl={originalImageUrl} 
+                predictionResult={result || undefined}
+                className="aspect-square w-full"
+              />
+            </div>
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 italic">
               Toggle the heatmap overlay using the eye icon in the top right corner.
             </p>
@@ -181,17 +297,16 @@ export default function ResultPage() {
           {/* Right column - Prediction results */}
           <div>
             <h2 className="text-xl font-semibold mb-4">Analysis Results</h2>
-            <PredictionCard result={result} />
+            <PredictionCard result={result || {}} />
           </div>
         </div>
 
         {/* Clinical advice section */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Clinical Guidance</h2>
-          <RuleBasedAdvice result={result} />
+          <RuleBasedAdvice result={result || {}} />
         </div>
         
-
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
           <p className="text-sm text-yellow-800 dark:text-yellow-300">
             <strong>Disclaimer:</strong> This system is intended as a clinical decision support tool only. 
