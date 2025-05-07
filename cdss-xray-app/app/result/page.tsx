@@ -7,13 +7,20 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import PredictionCard from '@/components/ui/PredictionCard';
 import HeatmapViewer from '@/components/ui/HeatmapViewer';
 import RuleBasedAdvice from '@/components/ui/RuleBasedAdvice';
-import { PredictionResult } from '@/types';
-import { ArrowLeft, Download } from 'lucide-react';
+import PatientVitalsForm from '@/components/ui/PatientVitalsForm';
+import FinalDiagnosisCard from '@/components/ui/FinalDiagnosisCard';
+import { FinalDiagnosisResult, PatientVitals, PredictionResult } from '@/types';
+import { ArrowLeft, Download, ChevronDown, ChevronUp } from 'lucide-react';
+import { submitVitalsForAnalysis } from '@/utils/predictionService';
 
 export default function ResultPage() {
   const [result, setResult] = useState<PredictionResult | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSubmittingVitals, setIsSubmittingVitals] = useState<boolean>(false);
+  const [finalResult, setFinalResult] = useState<FinalDiagnosisResult | null>(null);
+  const [showVitalsForm, setShowVitalsForm] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   // Load results from sessionStorage on mount
@@ -37,10 +44,41 @@ export default function ResultPage() {
     }
   }, [router]);
 
+  // Handle patient vitals submission
+  const handleVitalsSubmit = async (vitals: PatientVitals) => {
+    if (!result || !originalImageUrl) return;
+    
+    setIsSubmittingVitals(true);
+    setError(null);
+    
+    try {
+      const enhancedResult = await submitVitalsForAnalysis(
+        result,
+        originalImageUrl,
+        vitals
+      );
+      
+      setFinalResult(enhancedResult);
+      setShowVitalsForm(false); // Collapse form after successful submission
+      
+      // Store the final result in session storage for persistence
+      sessionStorage.setItem('finalXrayResult', JSON.stringify(enhancedResult));
+    } catch (error) {
+      console.error('Vitals submission error:', error);
+      setError(error instanceof Error ? error.message : 'An unknown error occurred');
+    } finally {
+      setIsSubmittingVitals(false);
+    }
+  };
+
   // Handle PDF download (mock functionality)
   const handleDownloadReport = () => {
     // In a real app, this would generate a PDF report
     alert('PDF download functionality would be implemented here.');
+  };
+
+  const toggleVitalsForm = () => {
+    setShowVitalsForm(prev => !prev);
   };
 
   if (isLoading) {
@@ -123,11 +161,63 @@ export default function ResultPage() {
           </div>
         </div>
 
+
+        {/* Patient Vitals Form Section */}
+        <div className="mb-8">
+          <div
+            className="flex justify-between items-center cursor-pointer mb-4"
+            onClick={toggleVitalsForm}
+          >
+            <h2 className="text-xl font-semibold">
+              {finalResult ? 'Submitted Patient Vitals' : 'Add Patient Vitals'}
+            </h2>
+            <button
+              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+              aria-label={showVitalsForm ? 'Hide vitals form' : 'Show vitals form'}
+            >
+              {showVitalsForm ? (
+                <ChevronUp className="h-5 w-5" />
+              ) : (
+                <ChevronDown className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+
+          {showVitalsForm && (
+            <div className="mb-4">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Add patient vitals and symptoms to enhance diagnostic accuracy and receive tailored treatment recommendations.
+              </p>
+
+              {error && (
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+                </div>
+              )}
+
+              <PatientVitalsForm
+                onSubmit={handleVitalsSubmit}
+                isSubmitting={isSubmittingVitals}
+              />
+            </div>
+          )}
+
+          {/* Final Diagnosis Results (shown after vitals submission) */}
+          {finalResult && (
+            <div className="mt-6 animate-fadeIn">
+              <h2 className="text-xl font-semibold mb-4">Enhanced Diagnostic Results</h2>
+              <FinalDiagnosisCard result={finalResult} />
+            </div>
+          )}
+        </div>
+
+
         {/* Clinical advice section */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Clinical Guidance</h2>
           <RuleBasedAdvice result={result} />
         </div>
+        
 
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
           <p className="text-sm text-yellow-800 dark:text-yellow-300">

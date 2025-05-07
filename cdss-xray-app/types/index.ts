@@ -70,6 +70,24 @@ export interface PredictionResult {
   heatmapUrl?: string;
 }
 
+// Patient vitals types
+export interface PatientVitals {
+  temperature: number;  // in Celsius
+  systolicBP: number;   // mmHg
+  diastolicBP: number;  // mmHg
+  heartRate: number;    // bpm
+  hasCough: boolean;
+  hasHeadaches: boolean;
+  canSmellTaste: boolean;
+}
+
+export interface FinalDiagnosisResult extends PredictionResult {
+  diagnosisWithVitals?: string;
+  treatmentSuggestions?: string[];
+  severity?: 'Low' | 'Moderate' | 'High';
+  vitals?: PatientVitals;
+}
+
 // API response types
 export interface ApiResponse<T> {
   success: boolean;
