@@ -23,6 +23,7 @@ interface AuthContextType {
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE || 'false';
 
 // Create context
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -34,7 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Check if user is logged in on mount
+  // Check if user is logged in on mount and when localStorage changes
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -47,22 +48,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return;
         }
         
-        // Verify token with backend
-        const response = await fetch(`${API_BASE_URL}/auth/verify/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-        });
-        
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData.user);
-          setIsAuthenticated(true);
-        } else {
-          // Token invalid
+        // Instead of verifying with backend, restore from localStorage
+        try {
+          // Safely parse stored user data
+          const userDataString = localStorage.getItem('userData');
+          
+          if (!userDataString) {
+            // No user data found, clear token and logout
+            localStorage.removeItem('authToken');
+            setUser(null);
+            setIsAuthenticated(false);
+            setLoading(false);
+            return;
+          }
+          
+          // Parse the user data
+          const userData = JSON.parse(userDataString);
+          
+          if (userData && userData.id) {
+            setUser(userData);
+            setIsAuthenticated(true);
+          } else {
+            // Invalid user data
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userData');
+            setUser(null);
+            setIsAuthenticated(false);
+          }
+        } catch (e) {
+          console.error('Error parsing user data:', e);
           localStorage.removeItem('authToken');
+          localStorage.removeItem('userData');
           setUser(null);
           setIsAuthenticated(false);
         }
@@ -75,13 +91,55 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
     
-    checkAuth();
+    // Add a small delay to ensure localStorage is available (helps with Next.js hydration)
+    const timer = setTimeout(() => {
+      checkAuth();
+    }, 10);
+    
+    // Setup storage event listener to sync auth state across tabs
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'authToken' || e.key === 'userData') {
+        checkAuth();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
   
   // Login function
   const login = async (username: string, password: string): Promise<boolean> => {
     setLoading(true);
     setError(null);
+    
+    // Handle demo mode
+    if (DEMO_MODE === 'true') {
+      try {
+        // Mock successful login with demo user
+        const mockUser = {
+          id: '12345',
+          username: username,
+          email: `${username}@example.com`,
+          name: username
+        };
+        
+        // Store auth data
+        localStorage.setItem('authToken', 'mock-token-for-demo-mode');
+        localStorage.setItem('userData', JSON.stringify(mockUser));
+        setUser(mockUser);
+        setIsAuthenticated(true);
+        return true;
+      } catch (error) {
+        console.error('Demo login error:', error);
+        setError('Login failed in demo mode');
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    }
     
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login/`, {
@@ -98,6 +156,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (response.ok) {
         localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userData', JSON.stringify(data.user));
         setUser(data.user);
         setIsAuthenticated(true);
         return true;
@@ -120,6 +179,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(true);
     setError(null);
     
+    // Handle demo mode
+    if (DEMO_MODE === 'true') {
+      try {
+        // Mock successful registration
+        const mockUser = {
+          id: Date.now().toString(),
+          username: username,
+          email: email,
+          name: username
+        };
+        
+        // Store auth data
+        localStorage.setItem('authToken', 'mock-token-for-demo-mode');
+        localStorage.setItem('userData', JSON.stringify(mockUser));
+        setUser(mockUser);
+        setIsAuthenticated(true);
+        return true;
+      } catch (error) {
+        console.error('Demo registration error:', error);
+        setError('Registration failed in demo mode');
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    }
+    
     try {
       const response = await fetch(`${API_BASE_URL}/auth/signup/`, {
         method: 'POST',
@@ -135,6 +220,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (response.ok) {
         localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userData', JSON.stringify(data.user));
         setUser(data.user);
         setIsAuthenticated(true);
         return true;
@@ -155,7 +241,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     // Clear all auth-related storage
     localStorage.removeItem('authToken');
-    sessionStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
     // Reset user state
     setUser(null);
     setIsAuthenticated(false);

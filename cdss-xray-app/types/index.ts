@@ -111,11 +111,10 @@ export interface PatientVitals {
   diastolicBP: number;  // mmHg
   heartRate: number;    // bpm
   birthdate: string;    // YYYY-MM-DD format
-  gender: string;       // 'male', 'female', 'other'
+  gender: string;       // 'male', 'female'
   hasCough: boolean;
   hasHeadaches: boolean;
   canSmellTaste: boolean;
-  additionalNotes?: string;
 }
 
 export interface TreatmentSuggestion {

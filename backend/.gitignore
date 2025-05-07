@@ -8,3 +8,6 @@ venv/
 .vscode/
 
 core\db.sqlite3
+
+Pipfile
+Pipfile.lock
