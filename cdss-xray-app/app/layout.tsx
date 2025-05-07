@@ -11,17 +11,26 @@ export const metadata: Metadata = {
   description: "AI-powered clinical decision support system for chest X-ray analysis",
   icons: {
     icon: [
-      {
-        url: '/logo3.png',
-        href: '/logo3.png',
-      },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/logo3.png', type: 'image/png', sizes: '32x32' },
+      { url: '/logo3.png', type: 'image/png', sizes: '16x16' },
     ],
     apple: {
       url: '/logo3.png',
       sizes: '180x180',
       type: 'image/png',
     },
+    shortcut: [
+      { url: '/favicon.ico' }
+    ],
+    other: [
+      {
+        rel: 'mask-icon',
+        url: '/logo3.png',
+      }
+    ],
   },
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -46,6 +55,13 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* Additional favicon links for better cross-browser support */}
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/logo3.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/logo3.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/logo3.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#1E40AF" />
       </head>
       <body className="flex flex-col min-h-screen bg-gray-900 text-gray-100">
         {/* Include ThemeToggle component to enforce dark mode on client-side */}

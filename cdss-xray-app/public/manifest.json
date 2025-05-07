@@ -1,0 +1,27 @@
+{
+  "name": "CDSS X-Ray",
+  "short_name": "CDSS X-Ray",
+  "description": "AI-powered clinical decision support system for chest X-ray analysis",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#1E40AF",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/logo3.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/logo3.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
