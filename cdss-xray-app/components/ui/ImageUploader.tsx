@@ -4,7 +4,17 @@ import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { XRayImage, UploadProgressData } from '@/utils/imageUploadService';
+
+interface XRayImage {
+  file: File;
+  preview: string;
+}
+
+interface UploadProgressData {
+  progress: number;
+  status: 'idle' | 'uploading' | 'processing' | 'complete' | 'error';
+  message?: string;
+}
 
 interface ImageUploaderProps {
   onImageSelect: (image: XRayImage | null) => void;
@@ -35,7 +45,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<XRayImage | null>(null);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticatedUser} = useAuth();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setError(null);
@@ -74,12 +84,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     onImageSelect(image);
 
     // Auto upload if enabled
-    if (autoUpload && isAuthenticated) {
+    if (autoUpload && isAuthenticatedUser) {
       handleUpload(image);
     }
 
     // Clean up function not needed here as we'll handle it in clearImage
-  }, [onImageSelect, autoUpload, isAuthenticated, maxSizeMB]);
+  }, [onImageSelect, autoUpload, isAuthenticatedUser, maxSizeMB]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -106,7 +116,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   const handleUpload = async (image: XRayImage) => {
-    if (!isAuthenticated) {
+    if (!isAuthenticatedUser || disabled) {
       setError('You must be logged in to upload images');
       return;
     }
@@ -149,10 +159,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         }
       }, 300);
       
-      // In a real implementation, we would use the imageUploadService
-      // const uploadService = useImageUploadService();
-      // const imageId = await uploadService.uploadXRayImage(image, onUploadProgress);
-      // onUploadComplete?.(imageId);
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to upload image');
       setError(error.message);
@@ -162,7 +168,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`w-full max-w-[600px] mx-auto ${className}`}>
       {!preview ? (
         <div
           {...getRootProps()}
@@ -231,10 +237,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             <button
               onClick={() => handleUpload(selectedImage)}
               className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center justify-center"
-              disabled={!isAuthenticated || isUploading}
+              disabled={!isAuthenticatedUser|| isUploading}
             >
               <Upload className="h-5 w-5 mr-2" />
-              {isAuthenticated ? 'Upload Image for Analysis' : 'Login to Upload'}
+              {isAuthenticatedUser? 'Upload Image for Analysis' : 'Login to Upload'}
             </button>
           )}
         </div>

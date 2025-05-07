@@ -22,7 +22,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ title, description, icon }) =
 );
 
 export default function Home() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticatedUser } = useAuth();
   const [mounted, setMounted] = useState(false);
 
   // Wait for client-side mount to check authentication
@@ -49,10 +49,10 @@ export default function Home() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link 
-                  href={isAuthenticated ? "/analyze" : "/login"}
+                  href={isAuthenticatedUser ? "/analyze" : "/login"}
                   className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
                 >
-                  {isAuthenticated ? "Analyze X-Ray" : "Login to Start"}
+                  {isAuthenticatedUser ? "Analyze X-Ray" : "Login to Start"}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
                 <Link 
@@ -126,10 +126,10 @@ export default function Home() {
               </p>
             </div>
             <Link
-              href={isAuthenticated ? "/analyze" : "/login"}
+              href={isAuthenticatedUser ? "/analyze" : "/login"}
               className="inline-block px-8 py-4 bg-white text-blue-600 font-bold rounded-lg shadow hover:bg-blue-50 transition-colors"
             >
-              {isAuthenticated ? "Start Analysis" : "Login Now"}
+              {isAuthenticatedUser ? "Start Analysis" : "Login Now"}
             </Link>
           </div>
         </div>

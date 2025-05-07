@@ -11,7 +11,7 @@ import useAuth from '@/hooks/useAuth';
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticatedUser, logout, user } = useAuth();
 
   const navLinks = [
     { name: 'Home', href: '/' },
@@ -47,7 +47,7 @@ const Navbar = () => {
             <div className="hidden md:block ml-10">
               <div className="flex items-center space-x-4">
                 {navLinks.map((link) => 
-                  (!link.protected || isAuthenticated) && (
+                  (!link.protected || isAuthenticatedUser) && (
                     <Link 
                       key={link.name} 
                       href={link.href}
@@ -78,11 +78,8 @@ const Navbar = () => {
           
           {/* Right side: auth only */}
           <div className="hidden md:flex items-center">
-            {isAuthenticated ? (
+            {isAuthenticatedUser ? (
               <div className="flex items-center space-x-4">
-                <span className="text-sm font-medium">
-                  {user?.name || user?.username}
-                </span>
                 <button 
                   onClick={logout}
                   className="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
@@ -126,7 +123,7 @@ const Navbar = () => {
       })}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
           {navLinks.map((link) => 
-            (!link.protected || isAuthenticated) && (
+            (!link.protected || isAuthenticatedUser) && (
               <Link 
                 key={link.name} 
                 href={link.href}
@@ -155,7 +152,7 @@ const Navbar = () => {
             GitHub Repository
           </a>
           
-          {isAuthenticated ? (
+          {isAuthenticatedUser ? (
             <button 
               onClick={() => {
                 logout();

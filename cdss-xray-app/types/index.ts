@@ -1,6 +1,6 @@
 // Authentication types
 export interface AuthState {
-  isAuthenticated: boolean;
+  isAuthenticatedUser: boolean;
   user: UserProfile | null;
   error: string | null;
   tokens: AuthTokens | null;
@@ -58,16 +58,50 @@ export interface XRayImage {
   preview: string;
 }
 
-export interface PredictionResult {
-  topPrediction: {
-    label: string;
-    confidence: number;
-  };
-  predictions: {
-    label: string;
-    confidence: number;
-  }[];
+export interface Prediction {
+  label: string;
+  confidence: number;
+}
+
+export interface AnalysisResultData {
+  topPrediction: Prediction;
+  predictions: Prediction[];
+  heatmapUrl: string;
+  severity: "Low" | "Moderate" | "High";
+  diagnosisWithVitals?: string;
+  treatmentSuggestions?: string[];
+}
+
+export interface AnalysisResult {
+  success: boolean;
+  data: AnalysisResultData;
+  error?: string;
+}
+
+// Enhanced diagnosis with vitals
+export interface FinalDiagnosisResult {
+  topPrediction: Prediction;
+  predictions?: Prediction[];
   heatmapUrl?: string;
+  severity: "Low" | "Moderate" | "High";
+  diagnosisWithVitals: string;
+  treatmentSuggestions: string[];
+  vitals?: {
+    temperature: number;
+    systolicBP: number;
+    diastolicBP: number;
+    heartRate: number;
+    birthdate?: string;
+    gender?: string;
+    hasCough: boolean;
+    hasHeadaches: boolean;
+    canSmellTaste: boolean;
+    bloodPressureSystolic?: number;
+    bloodPressureDiastolic?: number;
+    hasHeadache?: boolean;
+  };
+  success?: boolean;
+  error?: string;
 }
 
 // Patient vitals types
@@ -76,16 +110,16 @@ export interface PatientVitals {
   systolicBP: number;   // mmHg
   diastolicBP: number;  // mmHg
   heartRate: number;    // bpm
+  birthdate: string;    // YYYY-MM-DD format
+  gender: string;       // 'male', 'female'
   hasCough: boolean;
   hasHeadaches: boolean;
   canSmellTaste: boolean;
 }
 
-export interface FinalDiagnosisResult extends PredictionResult {
-  diagnosisWithVitals?: string;
-  treatmentSuggestions?: string[];
-  severity?: 'Low' | 'Moderate' | 'High';
-  vitals?: PatientVitals;
+export interface TreatmentSuggestion {
+  type: string;
+  description: string;
 }
 
 // API response types
@@ -106,3 +140,4 @@ export interface PredictionResponse {
   }[];
   heatmap?: string; // base64 encoded image
 }
+

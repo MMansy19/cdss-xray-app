@@ -48,7 +48,7 @@ const RegisterForm = () => {
     setIsLoading(true);
     
     try {
-      const success = await register(formData.username, formData.password, formData.email);
+      const success = await register(formData.username, formData.email, formData.password);
       
       if (success) {
         router.push('/analyze');

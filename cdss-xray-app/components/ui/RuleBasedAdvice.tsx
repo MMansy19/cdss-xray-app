@@ -1,15 +1,23 @@
 'use client';
 
-import { PredictionResult } from '@/types';
 import { AlertTriangle, BookOpen, Stethoscope } from 'lucide-react';
 
 interface RuleBasedAdviceProps {
-  result: PredictionResult;
+  result: Record<string, number>;
   className?: string;
 }
 
 const RuleBasedAdvice: React.FC<RuleBasedAdviceProps> = ({ result, className = '' }) => {
-  const { topPrediction, predictions } = result;
+  // Extract diagnosis entries (exclude non-diagnosis fields like age)
+  const diagnosisEntries = Object.entries(result)
+    .filter(([key]) => !['age'].includes(key))
+    .map(([label, confidence]) => ({ label, confidence }));
+  
+  // Find the top prediction (highest confidence)
+  const topPrediction = diagnosisEntries.reduce(
+    (max, current) => current.confidence > max.confidence ? current : max, 
+    { label: '', confidence: 0 }
+  );
   
   // Get appropriate advice based on top prediction and confidence level
   const getAdvice = () => {
