@@ -1,6 +1,6 @@
 // Authentication types
 export interface AuthState {
-  isAuthenticated: boolean;
+  isAuthenticatedUser: boolean;
   user: UserProfile | null;
   error: string | null;
   tokens: AuthTokens | null;

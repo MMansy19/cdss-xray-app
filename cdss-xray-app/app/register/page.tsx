@@ -8,15 +8,15 @@ import RegisterForm from '@/components/ui/RegisterForm';
 import useAuth from '@/hooks/useAuth';
 
 export default function RegisterPage() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticatedUser, isLoading } = useAuth();
   const router = useRouter();
   
   // Redirect to analyze page if already authenticated
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (!isLoading && isAuthenticatedUser) {
       router.push('/analyze');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticatedUser, isLoading, router]);
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -47,7 +47,7 @@ export default function RegisterPage() {
   }
   
   // Don't render if user is authenticated (will redirect)
-  if (isAuthenticated) {
+  if (isAuthenticatedUser) {
     return null;
   }
 
