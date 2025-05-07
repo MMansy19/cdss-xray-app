@@ -28,9 +28,8 @@ vine==5.1.0
 wcwidth==0.2.13
 
 # to run the server
-# py manage.py create superuser
-
 # py manage.py makemigrations
 # py manage.py migrate
-
 # py manage.py runserver
+
+# py manage.py create superuser
