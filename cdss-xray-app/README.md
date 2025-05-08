@@ -1,184 +1,197 @@
-# 🩺 CDSS Chest X-ray Analysis Application
+# CDSS X-Ray Analysis Application
 
-![Next.js](https://img.shields.io/badge/Next.js-15.3-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
-![React](https://img.shields.io/badge/React-19.0-blue)
-![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.0-blue)
+A Clinical Decision Support System (CDSS) web application built with Next.js and Tailwind CSS that provides AI-powered diagnostic suggestions from chest X-ray images.
 
-A Clinical Decision Support System (CDSS) web application that enables healthcare professionals to upload chest X-ray images and receive AI-powered diagnostic suggestions. This application bridges the gap between modern web technology (Next.js + Tailwind CSS) and advanced medical image processing capabilities, offering a seamless user experience with reliable diagnostic support.
+## Features
 
-![App Screenshot](cdss-xray-app/public/logo2.png)
+- Upload and analyze chest X-ray images using AI models
+- Record and analyze patient vitals alongside X-ray images
+- View detailed analysis with confidence scores and heatmaps
+- Supports both API-powered and demo modes for flexibility
 
-## 📋 Table of Contents
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Architecture](#-architecture)
-- [Getting Started](#-getting-started)
-- [UI & UX Highlights](#-ui--ux-highlights)
-- [Deployment](#-deployment)
-- [Development Notes](#-development-notes)
-- [License](#-license)
-- [Contributing](#-contributing)
-- [Author](#-author)
-
-## 📸 Features
-
-- **🖼️ X-ray Image Upload**: Drag and drop interface for easy chest X-ray upload
-- **🤖 AI-powered Analysis**: Advanced machine learning models for accurate diagnostic suggestions
-- **🔍 Heatmap Visualization**: Visual highlighting of regions of interest in X-ray images
-- **📊 Detailed Results**: Comprehensive diagnostic suggestions with confidence scores
-- **🔁 Rule-Based Fallback**: Intelligent fallback mechanisms when ML inference is uncertain
-- **🌗 Light & Dark Mode**: Toggle between themes for comfortable viewing in any environment
-- **📱 Responsive Design**: Optimized user experience across all device sizes
-- **🔒 User Authentication**: Secure login and registration system
-- **📊 Interactive Data Visualization**: Display of prediction results using Recharts
-- **♻️ Component Architecture**: Clean, modular design with reusable components
-
-## 🧱 Tech Stack
-
-### 🌐 Frontend
-- **Next.js 15.3**: React framework with App Router architecture
-- **TypeScript**: Type-safe code development
-- **React 19**: Component-based UI library
-- **Tailwind CSS**: Utility-first CSS framework for styling
-- **React Dropzone**: For drag-and-drop file uploads
-- **Recharts**: For data visualization
-- **Lucide React**: Icon library
-
-### 🧠 AI & Backend
-- **Python**: Core backend language
-- **Flask/FastAPI**: API framework
-- **PyTorch/TensorFlow**: ML model implementation
-- **Pillow/OpenCV**: Image processing libraries
-- **NumPy/Pandas**: Data handling
-
-## 🏗 Architecture
-
-```
-├── app/                  # Next.js App Router pages
-│   ├── layout.tsx        # Root layout with providers
-│   ├── page.tsx          # Homepage
-│   ├── analyze/          # X-ray upload & analysis
-│   ├── result/           # Analysis results display
-│   ├── login/            # Authentication
-│   └── register/         # New user registration
-├── components/           # Reusable React components
-│   ├── ui/               # UI components
-│   │   ├── ImageUploader.tsx
-│   │   ├── HeatmapViewer.tsx
-│   │   └── ...
-├── hooks/                # Custom React hooks
-├── utils/                # Helper functions
-│   └── predictionService.ts
-├── types/                # TypeScript type definitions
-└── public/               # Static assets
-```
-
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
-- Node.js 18.x or higher
+
+- Node.js 18+ 
 - npm or yarn
-- Python 3.8+ (for backend services)
 
-### 1. Clone the Repository
+### Installation
 
-```bash
-git clone https://github.com/MMansy19/cdss-xray-app.git
-cd cdss-xray-app
+1. Clone the repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Set up environment variables by creating a `.env.local` file:
+   ```
+   NEXT_PUBLIC_API_URL=http://localhost:8000/api
+   NEXT_PUBLIC_DEMO_MODE=auto
+   ```
+
+### Development
+
+Run the development server:
 ```
-
-### 2. Install Frontend Dependencies
-
-```bash
-npm install
-# or
-yarn install
-```
-
-### 3. Run the Frontend Development Server
-
-```bash
 npm run dev
-# or
-yarn dev
 ```
 
-The application will be available at [http://localhost:3000](http://localhost:3000).
+### Testing
 
-### 4. Backend Setup (if applicable)
-
-```bash
-# Navigate to backend directory
-cd backend
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Start the backend server
-python app.py
-# or if using FastAPI
-uvicorn main:app --reload --port 5000
+Run the test suite:
+```
+npm test
 ```
 
-## 🎨 UI & UX Highlights
-
-- **Responsive Design**: Adapts seamlessly to mobile, tablet, and desktop views
-- **Theme Switching**: Elegant transition between light and dark modes
-- **Intuitive Upload**: Simple drag-and-drop interface with progress indicators
-- **Interactive Results**: Dynamic visualization of diagnostic findings
-- **Accessibility**: WCAG-compliant design elements
-- **Guided User Flow**: Clear navigation path from upload to results
-
-## 🚢 Deployment
+Run with coverage:
+```
+npm run test:coverage
+```
 
 ### Production Build
 
-```bash
+```
 npm run build
-# or
-yarn build
+npm start
 ```
 
-### Deployment Options
+## Project Architecture
 
-- **Vercel**: Recommended for Next.js applications
-- **Netlify**: Alternative deployment platform
-- **Docker**: Container-based deployment for consistent environments
+### Key Libraries
 
-## 💡 Development Notes
+- **Next.js** - React framework for server-rendered applications
+- **Tailwind CSS** - Utility-first CSS framework
+- **Jest & React Testing Library** - Testing frameworks
+- **React Dropzone** - For file uploads
+- **Recharts** - For data visualization
 
-- **Code Organization**: Following Next.js best practices with modular components
-- **State Management**: Using React hooks for local state management
-- **Type Safety**: Comprehensive TypeScript types for better code reliability
-- **Performance Optimization**: Efficient rendering with React best practices
-- **API Integration**: Clean separation between frontend and backend services
+### Directory Structure
 
-## 📜 License
+- `/app` - Next.js app directory (pages and layouts)
+- `/components` - React components
+- `/hooks` - Custom React hooks
+- `/utils` - Utility functions
+- `/types` - TypeScript type definitions
+- `/public` - Static assets
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## Core Concepts
 
-**Important**: This application is designed for educational and demonstration purposes only. All medical predictions should be reviewed by qualified healthcare professionals before clinical use.
+### Unified API Client
 
-## 🤝 Contributing
+All network requests are handled through a unified API client (`utils/apiClient.ts`) which provides:
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+- Consistent error handling and retries
+- Authentication token management
+- Transparent demo mode detection
+- Consistent response formatting
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+To use the API client:
 
-## 👨‍⚕️ Author
+```typescript
+import { apiRequest } from '@/utils/apiClient';
 
-**Mahmoud Mansy**  
-[GitHub Profile](https://github.com/MMansy19)
+// GET request
+const response = await apiRequest({
+  endpoint: '/some-endpoint',
+  method: 'GET',
+  requiresAuth: true
+});
 
----
+// POST request with JSON body
+const response = await apiRequest({
+  endpoint: '/submit-data',
+  method: 'POST',
+  body: { key: 'value' },
+  requiresAuth: true
+});
 
-Created with ❤️ for improving chest X-ray diagnostics
+// POST with form data
+const formData = new FormData();
+formData.append('file', fileObject);
+
+const response = await apiRequest({
+  endpoint: '/upload',
+  method: 'POST',
+  body: formData,
+  formData: true,
+  requiresAuth: true
+});
+```
+
+### Demo Mode
+
+The application supports a demo mode that works without a backend API. This is useful for:
+
+- Development without a backend
+- Demonstrations and presentations
+- Testing UI without API dependencies
+- Fallback when API is unavailable
+
+Demo mode can be configured in three ways:
+
+1. **Environment Variable**: Set `NEXT_PUBLIC_DEMO_MODE=true` in `.env.local`
+2. **Auto Detection**: Set `NEXT_PUBLIC_DEMO_MODE=auto` for automatic backend detection
+3. **Manual Toggle**: Use the Demo Mode toggle component in the UI
+
+### Authentication
+
+The application uses JWT-based authentication with the following features:
+
+- Secure token storage in localStorage
+- Token refresh functionality
+- Mock authentication in demo mode
+- Persistent sessions
+
+Authentication state is managed through the `useAuth` hook:
+
+```typescript
+const { user, isAuthenticatedUser, login, register, logout, error } = useAuth();
+```
+
+### X-Ray Analysis
+
+X-ray image analysis is handled through specialized services that integrate with the unified API client:
+
+- `utils/xrayAnalysisService.ts` - Core image analysis functions
+- `utils/mockService.ts` - Mock data generation for demo mode
+
+## Development Guidelines
+
+### Adding New Features
+
+1. Use the unified API client for all network requests
+2. Ensure demo mode compatibility for all features
+3. Write tests for all new functionality
+4. Maintain TypeScript type safety
+
+### Testing Strategy
+
+- Unit tests for utilities and hooks
+- Component tests for UI elements
+- Integration tests for key workflows
+- Mock API requests in tests
+
+### Error Handling
+
+All API requests should use the unified error handling from the API client:
+
+```typescript
+try {
+  const response = await apiRequest({...});
+  
+  if (response.error) {
+    // Handle API error
+    console.error(response.error);
+    return;
+  }
+  
+  // Handle success
+  const data = response.data;
+} catch (error) {
+  // Handle unexpected errors
+}
+```
+
+## License
+
+[MIT](LICENSE)

@@ -13,7 +13,7 @@ const nextConfig = {
   },
   // Enable demo mode by default for production builds
   env: {
-    NEXT_PUBLIC_DEMO_MODE: 'true',
+    NEXT_PUBLIC_DEMO_MODE: 'false',
   },
   // Ensure output is configured properly for Vercel
   output: 'standalone',

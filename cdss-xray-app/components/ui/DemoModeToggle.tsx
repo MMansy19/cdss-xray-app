@@ -1,60 +1,70 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Beaker } from 'lucide-react';
 import { isDemoModeForced, forceEnableDemoMode, disableForcedDemoMode } from '@/utils/backendDetection';
 import { isDemoModeSync } from '@/utils/mockService';
 
-const DemoModeToggle = () => {
-  const [isDemoActive, setIsDemoActive] = useState<boolean>(false);
+interface DemoModeToggleProps {
+  className?: string;
+}
 
-  // Check initial demo mode status
+export default function DemoModeToggle({ className = '' }: DemoModeToggleProps) {
+  const [demoMode, setDemoMode] = useState<boolean>(false);
+  const [mounted, setMounted] = useState<boolean>(false);
+
+  // Initialize state on component mount (client-side only)
   useEffect(() => {
-    // Check if demo mode is forced via localStorage
-    const forced = isDemoModeForced();
-    // Check if demo mode is configured via environment
-    const configDemo = isDemoModeSync();
-    
-    setIsDemoActive(forced || configDemo);
+    const envDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE?.toLowerCase() === 'true';
+    const forcedDemoMode = isDemoModeForced();
+    setDemoMode(envDemoMode || forcedDemoMode || isDemoModeSync());
+    setMounted(true);
   }, []);
 
-  const toggleDemoMode = () => {
-    if (isDemoActive) {
+  // Handle toggling demo mode
+  const handleToggle = () => {
+    if (demoMode) {
+      // If turning off demo mode, only disable the forced flag
+      // (can't override environment setting)
       disableForcedDemoMode();
-      setIsDemoActive(isDemoModeSync()); // May still be true if set in environment
+      
+      // Only update the UI state if it's not forced by environment
+      if (process.env.NEXT_PUBLIC_DEMO_MODE?.toLowerCase() !== 'true') {
+        setDemoMode(false);
+      }
     } else {
+      // Enable demo mode
       forceEnableDemoMode();
-      setIsDemoActive(true);
+      setDemoMode(true);
     }
   };
 
+  // Only render on client-side to prevent hydration issues
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      <div className="flex items-center bg-white dark:bg-gray-800 rounded-full shadow-lg px-3 py-2 border border-gray-200 dark:border-gray-700">
-        <button
-          onClick={toggleDemoMode}
-          className={`flex items-center text-sm font-medium ${
-            isDemoActive 
-              ? 'text-blue-500 dark:text-blue-400' 
-              : 'text-gray-600 dark:text-gray-400'
-          }`}
-          aria-label={isDemoActive ? 'Disable demo mode' : 'Enable demo mode'}
-          title={isDemoActive ? 'Demo mode is active (no backend required)' : 'Enable demo mode (no backend required)'}
-        >
-          <Beaker className="h-4 w-4 mr-1.5" />
-          <span>
-            {isDemoActive ? 'Demo Mode: On' : 'Demo Mode: Off'}
-          </span>
-        </button>
-      </div>
-      
-      {isDemoActive && (
-        <div className="mt-2 bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 text-xs p-2 rounded-md shadow border border-blue-200 dark:border-blue-800">
-          Running in demo mode. No backend server required.
-        </div>
-      )}
+    <div className={`flex items-center gap-2 ${className}`}>
+      <label 
+        htmlFor="demoModeToggle" 
+        className="relative inline-flex cursor-pointer items-center"
+      >
+        <input
+          id="demoModeToggle"
+          type="checkbox"
+          className="peer sr-only"
+          checked={demoMode}
+          onChange={handleToggle}
+          aria-label="Toggle Demo Mode"
+        />
+        <div className="h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-focus:outline peer-focus:ring-4 peer-focus:ring-blue-300 dark:bg-gray-700 dark:peer-checked:bg-blue-500 dark:peer-focus:ring-blue-800"></div>
+        <span className="ml-2 text-sm font-medium">
+          Demo Mode {demoMode ? 'On' : 'Off'}
+          {process.env.NEXT_PUBLIC_DEMO_MODE?.toLowerCase() === 'true' && (
+            <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">(Forced by environment)</span>
+          )}
+        </span>
+      </label>
     </div>
   );
-};
-
-export default DemoModeToggle;
+}

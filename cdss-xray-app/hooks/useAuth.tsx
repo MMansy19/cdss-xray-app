@@ -2,8 +2,14 @@
 
 import { useState, useEffect, createContext, useContext } from 'react';
 import { useRouter } from 'next/navigation';
+import { apiRequest } from '@/utils/apiClient';
+import { isDemoModeSync, isDemoMode } from '@/utils/mockService';
 
 interface User {
+  id?: string;
+  username?: string;
+  email?: string;
+  name?: string;
 }
 
 interface AuthTokens {
@@ -21,9 +27,6 @@ interface AuthContextType {
   isAuthenticatedUser: boolean;
   error: string | null;
 }
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE || 'false';
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -44,6 +47,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const safelyGet = (key: string): string | null => {
+    if (typeof window === 'undefined') return null;
+    
     try {
       const val = localStorage.getItem(key);
       return val === "undefined" ? null : val;
@@ -54,6 +59,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const checkAuth = () => {
       try {
         // First try to get auth tokens
@@ -121,11 +128,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
+  const login = async (username: string, password: string, retryCount: number = 0): Promise<boolean> => {
     setLoading(true);
     setError(null);
 
-    if (DEMO_MODE === 'true') {
+    const MAX_RETRIES = 3; // Limit the number of retries
+
+    // Check if in demo mode
+    const demoMode = isDemoModeSync() || await isDemoMode();
+    if (demoMode) {
       try {
         const mockUser = {
           id: '12345',
@@ -152,16 +163,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login/`, {
+      const response = await apiRequest<any>({
+        endpoint: '/auth/login/',
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-        signal: AbortSignal.timeout(10000)
+        body: { username, password },
+        requiresAuth: false
       });
 
-      const data = await response.json();
+      if (response.error) {
+        setError(response.error.message || 'Login failed');
+        return false;
+      }
 
-      if (response.ok && data) {
+      const data = response.data;
+      
+      if (data) {
         if (data.access_token && data.refresh_token) {
           localStorage.setItem('authTokens', JSON.stringify({
             access_token: data.access_token,
@@ -180,10 +196,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(data);
         return true;
       } else {
-        setError(data.detail || 'Login failed');
+        setError('Login failed - no data returned');
         return false;
       }
     } catch (error) {
+      if (error instanceof Error && error.message === 'DEMO_MODE_ENABLED') {
+        // If demo mode is forced, handle login as demo
+        if (retryCount < MAX_RETRIES) {
+          return login(username, password, retryCount + 1);
+        } else {
+          console.error('Max retries reached for DEMO_MODE_ENABLED');
+          setError('Demo mode login failed after multiple attempts');
+          return false;
+        }
+      }
+      
       console.error('Login error:', error);
       setError('Network error');
       return false;
@@ -196,7 +223,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(true);
     setError(null);
 
-    if (DEMO_MODE === 'true') {
+    // Check if in demo mode
+    const demoMode = isDemoModeSync() || await isDemoMode();
+    if (demoMode) {
       try {
         const mockUser = {
           id: Date.now().toString(),
@@ -223,26 +252,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/signup/`, {
+      const response = await apiRequest<any>({
+        endpoint: '/auth/signup/',
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password }),
-        signal: AbortSignal.timeout(10000)
+        body: { username, email, password },
+        requiresAuth: false
       });
 
-      const data = await response.json();
+      if (response.error) {
+        setError(response.error.message || 'Registration failed');
+        return false;
+      }
 
-      if (response.ok && data) {
+      const data = response.data;
+      
+      if (data) {
         localStorage.setItem('userData', JSON.stringify(data));
         setUser(data);
-        console.log("User registered successfully."); 
+        console.log("User registered successfully.");
         router.push('/login');
         return true;
       } else {
-        setError(data.username?.[0] || data.email?.[0] || data.password?.[0] || 'Registration failed');
+        setError('Registration failed - no data returned');
         return false;
       }
     } catch (error) {
+      if (error instanceof Error && error.message === 'DEMO_MODE_ENABLED') {
+        // If demo mode is forced, handle registration as demo
+        return register(username, email, password);
+      }
+      
       console.error('Registration error:', error);
       setError('Network error');
       return false;
