@@ -193,7 +193,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       
       // Use our unified API client to handle the upload
       const response = await apiRequest<{ imageId: string }>({
-        endpoint: '/upload-scan',
+        endpoint: '/api/upload-scan',
         method: 'POST',
         body: formData,
         formData: true,
