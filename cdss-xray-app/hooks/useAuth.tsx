@@ -200,7 +200,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
     } catch (error) {
-      if (error instanceof Error && error.message === 'DEMO_MODE_ENABLED') {
+      if (error instanceof Error && (error.message === 'DEMO_MODE_ENABLED' || error.message.includes('demo'))) {
         // If demo mode is forced, handle login as demo
         if (retryCount < MAX_RETRIES) {
           return login(username, password, retryCount + 1);

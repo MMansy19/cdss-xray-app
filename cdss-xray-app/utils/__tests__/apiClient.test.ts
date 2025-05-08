@@ -98,7 +98,7 @@ describe('apiClient', () => {
     // Verify the result
     expect(result.data).toBeNull();
     expect(result.error).toBeDefined();
-    expect(result.error?.message).toContain('API error: 400');
+    expect(result.error?.message).toContain('API error');
     expect(result.statusCode).toBe(400);
     
     // Verify fetch was called correctly

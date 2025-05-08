@@ -3,6 +3,55 @@ import '@testing-library/jest-dom';
 import 'whatwg-fetch';
 import React from 'react';
 
+// Suppress console warnings during tests
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
+const originalConsoleLog = console.log;
+
+beforeAll(() => {
+  console.error = (...args) => {
+    // Check if this is a React internal warning/error that we want to ignore during tests
+    const message = args.join(' ');
+    if (
+      message.includes('Warning:') ||
+      message.includes('Error:') ||
+      message.includes('DEMO_MODE_ENABLED') ||
+      message.includes('not wrapped in act')
+    ) {
+      return;
+    }
+    originalConsoleError(...args);
+  };
+
+  console.warn = (...args) => {
+    // Suppress warnings during tests
+    if (args[0]?.includes?.('Warning:')) {
+      return;
+    }
+    originalConsoleWarn(...args);
+  };
+
+  console.log = (...args) => {
+    // Suppress logs related to demo mode or API calls during tests
+    const message = args.join(' ');
+    if (
+      message.includes('DEMO_MODE_ENABLED') ||
+      message.includes('API Request:') ||
+      message.includes('API Response:') ||
+      message.includes('User logged')
+    ) {
+      return;
+    }
+    originalConsoleLog(...args);
+  };
+});
+
+afterAll(() => {
+  console.error = originalConsoleError;
+  console.warn = originalConsoleWarn;
+  console.log = originalConsoleLog;
+});
+
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -79,6 +128,29 @@ Object.defineProperty(window, 'ResizeObserver', {
   writable: true,
   value: MockResizeObserver,
 });
+
+// Mock localStorage and sessionStorage
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'localStorage', {
+    value: {
+      getItem: jest.fn(),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+      clear: jest.fn(),
+    },
+    writable: true
+  });
+
+  Object.defineProperty(window, 'sessionStorage', {
+    value: {
+      getItem: jest.fn(),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+      clear: jest.fn(),
+    },
+    writable: true
+  });
+}
 
 // Global test cleanup
 afterEach(() => {

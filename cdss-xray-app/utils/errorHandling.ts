@@ -116,7 +116,8 @@ export function getUserFriendlyErrorMessage(error: Error): string {
     return validationError.message || 'Please check your input and try again';
   }
   
-  return 'An unexpected error occurred. Please try again.';
+  // Return the original message for generic errors
+  return (error as Error).message || 'An unexpected error occurred. Please try again.';
 }
 
 // Format error for logging

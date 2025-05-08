@@ -58,25 +58,8 @@ export const metadata: Metadata = {
     images: ['/logo3.png'],
   },
   icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/logo3.png', type: 'image/png', sizes: '32x32' },
-      { url: '/logo3.png', type: 'image/png', sizes: '16x16' },
-    ],
-    apple: {
-      url: '/logo3.png',
-      sizes: '180x180',
-      type: 'image/png',
-    },
-    shortcut: [
-      { url: '/favicon.ico' }
-    ],
-    other: [
-      {
-        rel: 'mask-icon',
-        url: '/logo3.png',
-      }
-    ],
+    icon: '/favicon.ico',
+    apple: '/logo3.png',
   },
   manifest: '/manifest.json',
 };
@@ -107,12 +90,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         
-        {/* Additional favicon links for better cross-browser support */}
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/logo3.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/logo3.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/logo3.png" />
-        <link rel="manifest" href="/manifest.json" />
+        {/* Removed duplicate favicon links since they are already defined in metadata */}
         <meta name="theme-color" content="#1E40AF" />
       </head>
       <body className="flex flex-col min-h-screen bg-gray-900 text-gray-100">
