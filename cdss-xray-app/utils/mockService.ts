@@ -57,9 +57,9 @@ export const processMockVitals = (vitals: PatientVitals): AnalysisResult => {
 // Async version that uses the backend detection
 export const isDemoMode = async (): Promise<boolean> => {
   // First check if demo mode has been manually forced
-  if (isDemoModeForced()) {
-    return true;
-  }
+  // if (isDemoModeForced()) {
+  //   return true;
+  // }
   return await shouldUseDemoMode();
 };
 
@@ -67,21 +67,21 @@ export const isDemoMode = async (): Promise<boolean> => {
 // This will use a simpler check without the backend availability test
 export const isDemoModeSync = (): boolean => {
   // First check if demo mode has been manually forced
-  if (isDemoModeForced()) {
-    return true;
-  }
+  // if (isDemoModeForced()) {
+  //   return true;
+  // }
   
-  const configuredDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE;
+  // const configuredDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE;
   
-  // If explicitly set to true, use demo mode
-  if (configuredDemoMode?.toLowerCase() === 'true') {
-    return true;
-  }
+  // // If explicitly set to true, use demo mode
+  // if (configuredDemoMode?.toLowerCase() === 'true') {
+  //   return true;
+  // }
   
-  // If explicitly set to false, don't use demo mode
-  if (configuredDemoMode?.toLowerCase() === 'false') {
-    return false;
-  }
+  // // If explicitly set to false, don't use demo mode
+  // if (configuredDemoMode?.toLowerCase() === 'false') {
+  //   return false;
+  // }
   
   // In "auto" mode or undefined, default to true if no API URL is set (safer)
   return !process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_URL === '';

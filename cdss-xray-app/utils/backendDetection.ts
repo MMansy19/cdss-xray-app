@@ -10,6 +10,7 @@ export const shouldUseDemoMode = async (): Promise<boolean> => {
   
   // If demo mode is explicitly set to "true", always use demo mode
   if (configuredDemoMode?.toLowerCase() === 'true') {
+    console.log('Demo mode is explicitly enabled in configuration.');   
     return true;
   }
   
@@ -20,6 +21,7 @@ export const shouldUseDemoMode = async (): Promise<boolean> => {
   
   // In "auto" mode or when set to "false" but API_URL is not defined, check if backend is available
   if (!process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_URL === '') {
+    console.log('API URL is not set. Defaulting to demo mode.');
     return true; // Always use demo mode if API URL is not set
   }
   
@@ -59,7 +61,7 @@ export const checkBackendAvailability = async (): Promise<boolean> => {
   checkingBackend = true;
   
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     
     // Try the health endpoint first
     const healthEndpoint = `${apiUrl}/health/`;
@@ -124,7 +126,7 @@ export const getEffectiveApiUrl = async (): Promise<string | null> => {
   if (useDemoMode) {
     return null;
   }
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 };
 
 /**

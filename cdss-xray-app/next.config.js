@@ -14,6 +14,7 @@ const nextConfig = {
   // Enable demo mode by default for production builds
   env: {
     NEXT_PUBLIC_DEMO_MODE: 'false',
+    NEXT_PUBLIC_API_URL: 'http://localhost:8000'
   },
   // Ensure output is configured properly for Vercel
   output: 'standalone',
