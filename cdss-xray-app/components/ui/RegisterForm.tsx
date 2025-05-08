@@ -66,13 +66,12 @@ const RegisterForm = () => {
     <div className="w-full max-w-md">
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Username Field */}
-        <div>
-          <div className="relative">
+        <div>          <div className="relative">
             <label 
               htmlFor="username" 
               className={`absolute left-3 ${
-                formData.username ? '-top-2.5 text-xs bg-white dark:bg-gray-800 px-1' : 'top-3 text-sm'
-              } text-gray-500 dark:text-gray-400 transition-all duration-200`}
+                formData.username ? '-top-2.5 text-xs bg-white dark:bg-gray-800 px-1 z-10' : 'top-3 text-sm z-10'
+              } text-gray-700 dark:text-gray-300 transition-all duration-200 font-medium`}
             >
               Username
             </label>
@@ -89,7 +88,7 @@ const RegisterForm = () => {
                 onChange={handleChange}
                 className={`block w-full pl-10 pr-3 py-3 border ${
                   displayError ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white pt-5`}
               />
             </div>
           </div>
@@ -97,12 +96,11 @@ const RegisterForm = () => {
 
         {/* Email Field */}
         <div>
-          <div className="relative">
-            <label 
+          <div className="relative">            <label 
               htmlFor="email" 
               className={`absolute left-3 ${
-                formData.email ? '-top-2.5 text-xs bg-white dark:bg-gray-800 px-1' : 'top-3 text-sm'
-              } text-gray-500 dark:text-gray-400 transition-all duration-200`}
+                formData.email ? '-top-2.5 text-xs bg-white dark:bg-gray-800 px-1 z-10' : 'top-3 text-sm z-10'
+              } text-gray-700 dark:text-gray-300 transition-all duration-200 font-medium`}
             >
               Email
             </label>
@@ -119,7 +117,7 @@ const RegisterForm = () => {
                 onChange={handleChange}
                 className={`block w-full pl-10 pr-3 py-3 border ${
                   displayError ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white pt-5`}
               />
             </div>
           </div>
@@ -127,12 +125,11 @@ const RegisterForm = () => {
 
         {/* Password Field */}
         <div>
-          <div className="relative">
-            <label 
+          <div className="relative">            <label 
               htmlFor="password" 
               className={`absolute left-3 ${
-                formData.password ? '-top-2.5 text-xs bg-white dark:bg-gray-800 px-1' : 'top-3 text-sm'
-              } text-gray-500 dark:text-gray-400 transition-all duration-200`}
+                formData.password ? '-top-2.5 text-xs bg-white dark:bg-gray-800 px-1 z-10' : 'top-3 text-sm z-10'
+              } text-gray-700 dark:text-gray-300 transition-all duration-200 font-medium`}
             >
               Password
             </label>
@@ -149,7 +146,7 @@ const RegisterForm = () => {
                 onChange={handleChange}
                 className={`block w-full pl-10 pr-3 py-3 border ${
                   displayError ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white pt-5`}
               />
             </div>
           </div>
@@ -157,12 +154,11 @@ const RegisterForm = () => {
 
         {/* Confirm Password Field */}
         <div>
-          <div className="relative">
-            <label 
+          <div className="relative">            <label 
               htmlFor="confirmPassword" 
               className={`absolute left-3 ${
-                formData.confirmPassword ? '-top-2.5 text-xs bg-white dark:bg-gray-800 px-1' : 'top-3 text-sm'
-              } text-gray-500 dark:text-gray-400 transition-all duration-200`}
+                formData.confirmPassword ? '-top-2.5 text-xs bg-white dark:bg-gray-800 px-1 z-10' : 'top-3 text-sm z-10'
+              } text-gray-700 dark:text-gray-300 transition-all duration-200 font-medium`}
             >
               Confirm Password
             </label>
@@ -179,7 +175,7 @@ const RegisterForm = () => {
                 onChange={handleChange}
                 className={`block w-full pl-10 pr-3 py-3 border ${
                   displayError ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white pt-5`}
               />
             </div>
           </div>

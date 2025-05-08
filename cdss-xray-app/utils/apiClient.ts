@@ -54,7 +54,7 @@ function getAuthTokens(): {access_token: string | null, refresh_token: string | 
   return {access_token: null, refresh_token: null};
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://your-backend-api.com';
 
 export async function apiRequest<T>(config: ApiRequestConfig): Promise<ApiResponse<T>> {
   const {
