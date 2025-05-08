@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { isDemoMode, isDemoModeSync } from '@/utils/mockService';
 import { apiRequest } from '@/utils/apiClient';
 
 interface XRayImage {
@@ -47,28 +46,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<XRayImage | null>(null);
-  const [demoMode, setDemoMode] = useState<boolean>(false);
   const { isAuthenticatedUser } = useAuth();
-
-  // Check for demo mode on mount and when component receives focus
-  useEffect(() => {
-    const checkDemoMode = async () => {
-      const isInDemoMode = isDemoModeSync() || await isDemoMode();
-      setDemoMode(isInDemoMode);
-    };
-    
-    checkDemoMode();
-    
-    // Re-check when window gets focus
-    const handleFocus = () => {
-      checkDemoMode();
-    };
-    
-    window.addEventListener('focus', handleFocus);
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, []);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setError(null);
@@ -157,35 +135,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       // Update progress to 0%
       onUploadProgress?.({ progress: 0, status: 'uploading', message: 'Starting upload...' });
       
-      // Check for demo mode
-      const isInDemoMode = demoMode || isDemoModeSync() || await isDemoMode();
-      
-      if (isInDemoMode) {
-        // Simulate upload in demo mode with progress updates
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress += 10;
-          onUploadProgress?.({ 
-            progress, 
-            status: 'uploading', 
-            message: progress < 100 ? `Uploading: ${progress}%` : 'Processing image...' 
-          });
-          
-          if (progress >= 100) {
-            clearInterval(interval);
-            
-            // Simulate processing delay
-            setTimeout(() => {
-              const fakeId = `demo-image-${Date.now()}`;
-              onUploadComplete?.(fakeId);
-              setIsUploading(false);
-            }, 1000);
-          }
-        }, 300);
-        
-        return;
-      }
-      
       // Real upload using our unified API client
       const formData = new FormData();
       formData.append('image', image.file);
@@ -213,29 +162,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       
     } catch (err) {
       console.error('Upload error:', err);
-      
-      if (err instanceof Error && err.message === 'DEMO_MODE_ENABLED') {
-        // If demo mode is enabled during the upload, simulate a successful upload
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress += 20;
-          onUploadProgress?.({ 
-            progress, 
-            status: 'uploading', 
-            message: progress < 100 ? `Demo mode: ${progress}%` : 'Processing...' 
-          });
-          
-          if (progress >= 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-              const fakeId = `demo-image-${Date.now()}`;
-              onUploadComplete?.(fakeId);
-              setIsUploading(false);
-            }, 1000);
-          }
-        }, 200);
-        return;
-      }
       
       const error = err instanceof Error ? err : new Error('Failed to upload image');
       setError(error.message);
@@ -278,7 +204,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-500">
               Supported formats: JPG, JPEG, PNG (Max {maxSizeMB}MB)
-              {demoMode && <span className="ml-1 font-medium">(Demo Mode)</span>}
             </p>
           </div>
         </div>
@@ -306,7 +231,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               {isUploading && (
                 <div className="absolute inset-0 bg-gray-900/50 flex flex-col items-center justify-center text-white">
                   <Loader2 className="h-10 w-10 animate-spin mb-2" />
-                  <p>Uploading...{demoMode && ' (Demo Mode)'}</p>
+                  <p>Uploading...</p>
                 </div>
               )}
             </div>
@@ -320,7 +245,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             >
               <Upload className="h-5 w-5 mr-2" />
               {isAuthenticatedUser ? 'Upload Image for Analysis' : 'Login to Upload'}
-              {demoMode && isAuthenticatedUser && ' (Demo Mode)'}
             </button>
           )}
         </div>

@@ -1,27 +1,10 @@
 import { AnalysisResult, PatientVitals } from '../types';
 import { apiRequest } from './apiClient';
-import { getMockAnalysisResult, processMockVitals, isDemoMode, isDemoModeSync } from './mockService';
 
 /**
  * Analyzes an X-ray image and patient vitals by sending them to the backend API
- * Falls back to demo mode if the backend is unavailable
  */
 export async function analyzeXray(image?: File, vitals?: PatientVitals): Promise<AnalysisResult> {
-  // Check if we should use demo mode
-  const demoMode = isDemoModeSync() || await isDemoMode();
-  if (demoMode) {
-    console.log("[X-ray Service] Running in demo mode - using mock data for analysis");
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // If vitals are provided, process with vitals, otherwise return basic analysis
-    if (vitals) {
-      return processMockVitals(vitals);
-    } else {
-      return getMockAnalysisResult();
-    }
-  }
-
   try { 
     if (!image || !vitals) {
       throw new Error('Both image and vitals are required');
@@ -56,22 +39,7 @@ export async function analyzeXray(image?: File, vitals?: PatientVitals): Promise
     return response.data as AnalysisResult;
   } catch (error) {
     console.error("[X-ray Service] Error analyzing data:", error);
-    
-    if (error instanceof Error && error.message === 'DEMO_MODE_ENABLED') {
-      // If demo mode is enabled, return mock data
-      if (vitals) {
-        return processMockVitals(vitals);
-      } else {
-        return getMockAnalysisResult();
-      }
-    }
-    
-    // For other errors, also fall back to demo mode
-    if (vitals) {
-      return processMockVitals(vitals);
-    } else {
-      return getMockAnalysisResult();
-    }
+    throw error;
   }
 }
 

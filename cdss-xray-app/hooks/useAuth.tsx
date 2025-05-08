@@ -3,7 +3,6 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/utils/apiClient';
-import { isDemoModeSync, isDemoMode } from '@/utils/mockService';
 
 interface User {
   id?: string;
@@ -48,7 +47,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const safelyGet = (key: string): string | null => {
     if (typeof window === 'undefined') return null;
-    
+
     try {
       const val = localStorage.getItem(key);
       return val === "undefined" ? null : val;
@@ -60,7 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
+
     const checkAuth = () => {
       try {
         // First try to get auth tokens
@@ -121,46 +120,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('focus', checkAuth); // Re-check auth when tab gets focus
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('focus', checkAuth);
     };
   }, []);
 
-  const login = async (username: string, password: string, retryCount: number = 0): Promise<boolean> => {
+  const login = async (username: string, password: string): Promise<boolean> => {
     setLoading(true);
     setError(null);
-
-    const MAX_RETRIES = 3; // Limit the number of retries
-
-    // Check if in demo mode
-    const demoMode = isDemoModeSync() || await isDemoMode();
-    if (demoMode) {
-      try {
-        const mockUser = {
-          id: '12345',
-          username,
-          email: `${username}@example.com`,
-          name: username
-        };
-        const mockTokens = {
-          access_token: 'demo-access-token',
-          refresh_token: 'demo-refresh-token'
-        };
-
-        localStorage.setItem('authTokens', JSON.stringify(mockTokens));
-        localStorage.setItem('authToken', mockTokens.access_token);
-        localStorage.setItem('userData', JSON.stringify(mockUser));
-        setUser(mockUser);
-        return true;
-      } catch (error) {
-        setError('Demo login failed');
-        return false;
-      } finally {
-        setLoading(false);
-      }
-    }
 
     try {
       const response = await apiRequest<any>({
@@ -176,7 +145,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       const data = response.data;
-      
+
       if (data) {
         if (data.access_token && data.refresh_token) {
           localStorage.setItem('authTokens', JSON.stringify({
@@ -200,19 +169,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
     } catch (error) {
-      if (error instanceof Error && (error.message === 'DEMO_MODE_ENABLED' || error.message.includes('demo'))) {
-        // If demo mode is forced, handle login as demo
-        if (retryCount < MAX_RETRIES) {
-          return login(username, password, retryCount + 1);
-        } else {
-          console.error('Max retries reached for DEMO_MODE_ENABLED');
-          setError('Demo mode login failed after multiple attempts');
-          return false;
-        }
-      }
-      
       console.error('Login error:', error);
-      setError('Network error');
+      setError('Network error. Please check your connection and try again.');
       return false;
     } finally {
       setLoading(false);
@@ -222,34 +180,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const register = async (username: string, email: string, password: string): Promise<boolean> => {
     setLoading(true);
     setError(null);
-
-    // Check if in demo mode
-    const demoMode = isDemoModeSync() || await isDemoMode();
-    if (demoMode) {
-      try {
-        const mockUser = {
-          id: Date.now().toString(),
-          username,
-          email,
-          name: username
-        };
-        const mockTokens = {
-          access_token: 'demo-access-token',
-          refresh_token: 'demo-refresh-token'
-        };
-
-        localStorage.setItem('authTokens', JSON.stringify(mockTokens));
-        localStorage.setItem('authToken', mockTokens.access_token);
-        localStorage.setItem('userData', JSON.stringify(mockUser));
-        setUser(mockUser);
-        return true;
-      } catch (error) {
-        setError('Demo registration failed');
-        return false;
-      } finally {
-        setLoading(false);
-      }
-    }
 
     try {
       const response = await apiRequest<any>({
@@ -265,7 +195,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       const data = response.data;
-      
+
       if (data) {
         localStorage.setItem('userData', JSON.stringify(data));
         setUser(data);
@@ -277,13 +207,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
     } catch (error) {
-      if (error instanceof Error && error.message === 'DEMO_MODE_ENABLED') {
-        // If demo mode is forced, handle registration as demo
-        return register(username, email, password);
-      }
-      
       console.error('Registration error:', error);
-      setError('Network error');
+      setError('Network error. Please check your connection and try again.');
       return false;
     } finally {
       setLoading(false);

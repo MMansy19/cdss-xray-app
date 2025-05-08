@@ -11,9 +11,8 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920], // Optimize for common device sizes
     imageSizes: [16, 32, 48, 64, 96, 128, 256], // Additional image sizes for responsive images
   },
-  // Enable demo mode by default for production builds
+  // Configure only the API URL for backend integration
   env: {
-    NEXT_PUBLIC_DEMO_MODE: 'false',
     NEXT_PUBLIC_API_URL: 'http://localhost:8000'
   },
   // Ensure output is configured properly for Vercel

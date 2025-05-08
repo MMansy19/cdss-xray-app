@@ -3,34 +3,6 @@ let checkingBackend = false;
 let lastCheckTime = 0;
 
 /**
- * Determines if we should use demo mode based on configuration and backend availability
- */
-export const shouldUseDemoMode = async (): Promise<boolean> => {
-  const configuredDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE;
-  
-  // If demo mode is explicitly set to "true", always use demo mode
-  if (configuredDemoMode?.toLowerCase() === 'true') {
-    console.log('Demo mode is explicitly enabled in configuration.');   
-    return true;
-  }
-  
-  // If demo mode is set to anything other than "auto" and not false, don't use demo mode
-  if (configuredDemoMode?.toLowerCase() !== 'auto' && configuredDemoMode?.toLowerCase() !== 'false') {
-    return false;
-  }
-  
-  // In "auto" mode or when set to "false" but API_URL is not defined, check if backend is available
-  if (!process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_URL === '') {
-    console.log('API URL is not set. Defaulting to demo mode.');
-    return true; // Always use demo mode if API URL is not set
-  }
-  
-  // In "auto" mode, check if backend is available
-  const isBackendAvailable = await checkBackendAvailability();
-  return !isBackendAvailable;
-};
-
-/**
  * Checks if the backend server is available
  * Uses caching to avoid repeated checks in short timeframes
  */
@@ -55,7 +27,7 @@ export const checkBackendAvailability = async (): Promise<boolean> => {
     if (backendAvailableCache !== null) {
       return backendAvailableCache;
     }
-    return false; // Default to demo mode if check takes too long
+    return false;
   }
   
   checkingBackend = true;
@@ -119,40 +91,8 @@ export const checkBackendAvailability = async (): Promise<boolean> => {
 };
 
 /**
- * Get the effective API URL based on backend availability
+ * Get the API URL
  */
-export const getEffectiveApiUrl = async (): Promise<string | null> => {
-  const useDemoMode = await shouldUseDemoMode();
-  if (useDemoMode) {
-    return null;
-  }
+export const getEffectiveApiUrl = (): string => {
   return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-};
-
-/**
- * Force demo mode on by setting localStorage flag
- */
-export const forceEnableDemoMode = (): void => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('forceDemoMode', 'true');
-  }
-};
-
-/**
- * Check if demo mode has been manually forced
- */
-export const isDemoModeForced = (): boolean => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('forceDemoMode') === 'true';
-  }
-  return false;
-};
-
-/**
- * Disable forced demo mode
- */
-export const disableForcedDemoMode = (): void => {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('forceDemoMode');
-  }
 };

@@ -1,17 +1,5 @@
 import { apiRequest } from '../apiClient';
-import { setupLocalStorageMock, setupAuthMock, resetMocks, setupDemoModeMock } from '../testUtils';
-import * as mockService from '../mockService';
-
-// Mock the mockService's isDemoMode and isDemoModeSync functions
-jest.mock('../mockService', () => ({
-  isDemoMode: jest.fn().mockResolvedValue(false),
-  isDemoModeSync: jest.fn().mockReturnValue(false)
-}));
-
-// Mock the forceEnableDemoMode function
-jest.mock('../backendDetection', () => ({
-  forceEnableDemoMode: jest.fn()
-}));
+import { setupLocalStorageMock, setupAuthMock, resetMocks } from '../testUtils';
 
 describe('apiClient', () => {
   let originalFetch: typeof fetch;
@@ -65,7 +53,7 @@ describe('apiClient', () => {
     // Verify fetch was called correctly
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(global.fetch).toHaveBeenCalledWith(
-      'http://localhost:8000/api/test-endpoint',
+      'http://localhost:8000/test-endpoint',
       expect.objectContaining({
         method: 'GET',
         headers: expect.any(Headers),
@@ -104,33 +92,13 @@ describe('apiClient', () => {
     // Verify fetch was called correctly
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(global.fetch).toHaveBeenCalledWith(
-      'http://localhost:8000/api/test-endpoint',
+      'http://localhost:8000/test-endpoint',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ test: 'data' }),
         headers: expect.any(Headers),
       })
     );
-  });
-  
-  it('should not make API requests when in demo mode', async () => {
-    // Enable demo mode
-    (mockService.isDemoModeSync as jest.Mock).mockReturnValueOnce(true);
-    
-    // Make the API request
-    try {
-      await apiRequest({
-        endpoint: '/test-endpoint',
-        method: 'GET'
-      });
-      // Should not reach here
-      expect(true).toBe(false);
-    } catch (error: any) {
-      expect(error.message).toBe('DEMO_MODE_ENABLED');
-    }
-    
-    // Verify fetch was NOT called
-    expect(global.fetch).not.toHaveBeenCalled();
   });
   
   it('should include auth token when requiresAuth is true', async () => {

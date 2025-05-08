@@ -8,7 +8,3 @@ export { analyzeXray };
 
 // Legacy function names mapped to new implementations
 export const analyzeAndSubmit = analyzeXray;
-
-// Re-export helper functions to check if demo mode is enabled
-export { isDemoMode, isDemoModeSync } from './mockService';
-export { forceEnableDemoMode, disableForcedDemoMode } from './backendDetection';

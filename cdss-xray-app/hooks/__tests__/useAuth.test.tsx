@@ -3,14 +3,9 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { AuthProvider, useAuth } from '../useAuth';
 import { setupLocalStorageMock } from '@/utils/testUtils';
 import * as apiClient from '@/utils/apiClient';
-import * as mockService from '@/utils/mockService';
 
 // Mock dependencies
 jest.mock('@/utils/apiClient');
-jest.mock('@/utils/mockService', () => ({
-  isDemoMode: jest.fn().mockResolvedValue(false),
-  isDemoModeSync: jest.fn().mockReturnValue(false)
-}));
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
@@ -123,40 +118,6 @@ describe('useAuth', () => {
       access_token: 'api-token',
       refresh_token: 'api-refresh'
     });
-  });
-  
-  it('logs in with mock user in demo mode', async () => {
-    // Enable demo mode
-    (mockService.isDemoModeSync as jest.Mock).mockReturnValueOnce(true);
-    
-    const { result } = renderHook(() => useAuth(), { wrapper });
-    
-    // Wait for the initial auth check to complete
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
-    
-    // Initially no user
-    expect(result.current.user).toBeNull();
-    
-    // Perform login
-    let loginResult;
-    await act(async () => {
-      loginResult = await result.current.login('demouser', 'demopass');
-    });
-    
-    // Login should be successful
-    expect(loginResult).toBe(true);
-    
-    // API should NOT have been called
-    expect(apiClient.apiRequest).not.toHaveBeenCalled();
-    
-    // User should be set with demo data
-    expect(result.current.user).toEqual(expect.objectContaining({
-      username: 'demouser',
-      email: 'demouser@example.com'
-    }));
-    expect(result.current.isAuthenticatedUser).toBe(true);
   });
   
   it('handles login errors from API', async () => {

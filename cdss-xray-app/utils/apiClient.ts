@@ -1,5 +1,3 @@
-import { isDemoMode, isDemoModeSync } from './mockService';
-import { forceEnableDemoMode } from './backendDetection';
 import { 
   ApiError, 
   NetworkError, 
@@ -70,13 +68,6 @@ export async function apiRequest<T>(config: ApiRequestConfig): Promise<ApiRespon
     formData = false,
     signal
   } = config;
-  
-  // Check if we should use demo mode first
-  const demoMode = isDemoModeSync() || await isDemoMode();
-  if (demoMode) {
-    console.log(`[API Client] Demo mode active - Skip request to ${endpoint}`);
-    throw new Error('DEMO_MODE_ENABLED');
-  }
 
   let currentRetry = 0;
   let response = null;
@@ -198,10 +189,9 @@ export async function apiRequest<T>(config: ApiRequestConfig): Promise<ApiRespon
             continue;
           }
           
-          forceEnableDemoMode();
           return {
             data: null,
-            error: new NetworkError('Request timed out. Switching to demo mode.'),
+            error: new NetworkError('Request timed out.'),
             statusCode: null,
             loading: false
           };
@@ -219,24 +209,9 @@ export async function apiRequest<T>(config: ApiRequestConfig): Promise<ApiRespon
           continue;
         }
         
-        // On persistent network errors, force demo mode
-        if (error.message.includes('Failed to fetch') || 
-            error.message.includes('NetworkError') ||
-            error.message.includes('network')) {
-          console.log('[API Client] Backend connection failed. Enabling demo mode for future requests.');
-          forceEnableDemoMode();
-          
-          return {
-            data: null,
-            error: new NetworkError(error.message),
-            statusCode: null,
-            loading: false
-          };
-        }
-        
         return {
           data: null,
-          error,
+          error: new NetworkError(error.message),
           statusCode: null,
           loading: false
         };

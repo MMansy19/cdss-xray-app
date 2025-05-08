@@ -1,45 +1,10 @@
 import { analyzeXray } from '../xrayAnalysisService';
 import * as apiClient from '../apiClient';
-import * as mockService from '../mockService';
 import { createMockXrayFile, mockAnalysisResult } from '../testUtils';
 import { PatientVitals } from '@/types';
 
 // Mock apiClient
 jest.mock('../apiClient');
-
-// Mock mockService functions
-jest.mock('../mockService', () => ({
-  isDemoMode: jest.fn().mockResolvedValue(false),
-  isDemoModeSync: jest.fn().mockReturnValue(false),
-  getMockAnalysisResult: jest.fn().mockReturnValue({
-    success: true,
-    data: {
-      topPrediction: { label: 'Mock Condition', confidence: 0.9 },
-      predictions: [
-        { label: 'Mock Condition', confidence: 0.9 },
-        { label: 'Secondary Condition', confidence: 0.4 }
-      ],
-      heatmapUrl: 'mock-url',
-      severity: 'Moderate',
-      diagnosisWithVitals: 'Mock diagnosis',
-      treatmentSuggestions: ['Mock suggestion 1', 'Mock suggestion 2']
-    }
-  }),
-  processMockVitals: jest.fn().mockImplementation(vitals => ({
-    success: true,
-    data: {
-      topPrediction: { label: 'Mock Condition', confidence: 0.9 },
-      predictions: [
-        { label: 'Mock Condition', confidence: 0.9 },
-        { label: 'Secondary Condition', confidence: 0.4 }
-      ],
-      heatmapUrl: 'mock-url',
-      severity: vitals.temperature > 38 ? 'High' : 'Moderate',
-      diagnosisWithVitals: `Mock diagnosis with temperature: ${vitals.temperature}`,
-      treatmentSuggestions: ['Mock suggestion 1', 'Mock suggestion 2']
-    }
-  }))
-}));
 
 // Helper function to create mock patient vitals with complete required fields
 const createMockVitals = (partialVitals: Partial<PatientVitals> = {}): PatientVitals => ({
@@ -61,29 +26,7 @@ describe('xrayAnalysisService', () => {
   });
   
   describe('analyzeXray', () => {
-    it('should use demo mode when it is enabled', async () => {
-      // Mock demo mode to be enabled
-      (mockService.isDemoModeSync as jest.Mock).mockReturnValueOnce(true);
-      
-      // Create test data
-      const mockImage = createMockXrayFile();
-      const mockVitals = createMockVitals({ 
-        temperature: 38.5, 
-        heartRate: 90, 
-        hasCough: true 
-      });
-      
-      // Call the function
-      const result = await analyzeXray(mockImage, mockVitals);
-      
-      // Verify mock service was used
-      expect(mockService.processMockVitals).toHaveBeenCalledWith(mockVitals);
-      expect(apiClient.apiRequest).not.toHaveBeenCalled();
-      expect(result.success).toBe(true);
-      expect(result.data).toBeDefined();
-    });
-    
-    it('should call apiRequest with correct parameters when not in demo mode', async () => {
+    it('should call apiRequest with correct parameters', async () => {
       // Mock apiRequest to return success
       const mockApiResponse = {
         data: mockAnalysisResult(),
@@ -113,7 +56,7 @@ describe('xrayAnalysisService', () => {
       // Verify apiRequest was called with correct parameters
       expect(apiClient.apiRequest).toHaveBeenCalledTimes(1);
       expect(apiClient.apiRequest).toHaveBeenCalledWith({
-        endpoint: '/upload-scan',
+        endpoint: '/api/upload-scan',
         method: 'POST',
         body: expect.any(FormData),
         formData: true,
@@ -121,34 +64,31 @@ describe('xrayAnalysisService', () => {
       });
     });
     
-    it('should fallback to demo mode on API error', async () => {
+    it('should throw error when API request fails', async () => {
       // Mock API error
-      (apiClient.apiRequest as jest.Mock).mockRejectedValueOnce(new Error('API Error'));
+      const apiError = new Error('API Error');
+      (apiClient.apiRequest as jest.Mock).mockRejectedValueOnce(apiError);
       
       // Create test data
       const mockImage = createMockXrayFile();
       const mockVitals = createMockVitals({ temperature: 37, heartRate: 80 });
       
-      // Call the function
-      const result = await analyzeXray(mockImage, mockVitals);
+      // Call the function and expect it to throw
+      await expect(analyzeXray(mockImage, mockVitals)).rejects.toThrow('API Error');
       
-      // Verify fallback to mock service
-      expect(mockService.processMockVitals).toHaveBeenCalledWith(mockVitals);
-      expect(result.success).toBe(true);
+      // Verify apiRequest was called
+      expect(apiClient.apiRequest).toHaveBeenCalledTimes(1);
     });
     
     it('should throw error when missing required parameters', async () => {
-      // Mock not in demo mode
-      (mockService.isDemoModeSync as jest.Mock).mockReturnValueOnce(false);
-      (mockService.isDemoMode as jest.Mock).mockResolvedValueOnce(false);
-      
       // Call without image
-      await expect(analyzeXray(undefined, createMockVitals({ temperature: 37 }))).resolves.toEqual(
-        expect.objectContaining({ success: true })
-      );
+      await expect(analyzeXray(undefined, createMockVitals({ temperature: 37 }))).rejects.toThrow('Both image and vitals are required');
+      
+      // Call without vitals
+      await expect(analyzeXray(createMockXrayFile(), undefined)).rejects.toThrow('Both image and vitals are required');
       
       // Verify API was not called
       expect(apiClient.apiRequest).not.toHaveBeenCalled();
     });
   });
-  });
+});
