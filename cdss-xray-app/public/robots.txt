@@ -1,0 +1,14 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /contact
+
+# Disallow crawling of private/auth-required pages
+Disallow: /login
+Disallow: /register
+Disallow: /analyze
+Disallow: /result
+
+# Sitemap location
+Sitemap: https://cdss-xray.example.com/sitemap.xml
