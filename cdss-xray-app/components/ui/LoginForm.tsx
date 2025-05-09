@@ -32,16 +32,15 @@ const LoginForm = () => {
   return (
     <div className="w-full max-w-md">
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>          <div className="relative">
+        <div>
+          <div className="mb-1">
             <label 
               htmlFor="username" 
-              className={`absolute left-3 ${
-                username ? '-top-2.5 text-xs bg-white dark:bg-gray-800 px-1 z-10' : 'top-3 text-sm z-10'
-              } text-gray-700 dark:text-gray-300 transition-all duration-200 font-medium`}
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
               Username
             </label>
-            <div className="mt-1 relative rounded-md shadow-sm">
+            <div className="relative rounded-md shadow-sm">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <User className="h-5 w-5 text-gray-400" />
               </div>
@@ -54,22 +53,21 @@ const LoginForm = () => {
                 onChange={(e) => setUsername(e.target.value)}
                 className={`block w-full pl-10 pr-3 py-3 border ${
                   error ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white pt-5`}
+                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
               />
             </div>
           </div>
         </div>
 
-        <div>          <div className="relative">
+        <div>
+          <div className="mb-1">
             <label 
               htmlFor="password" 
-              className={`absolute left-3 ${
-                password ? '-top-2.5 text-xs bg-white dark:bg-gray-800 px-1 z-10' : 'top-3 text-sm z-10'
-              } text-gray-700 dark:text-gray-300 transition-all duration-200 font-medium`}
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
               Password
             </label>
-            <div className="mt-1 relative rounded-md shadow-sm">
+            <div className="relative rounded-md shadow-sm">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -84,7 +82,7 @@ const LoginForm = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className={`block w-full pl-10 pr-3 py-3 border ${
                   error ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white pt-5`}
+                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
               />
             </div>
           </div>
