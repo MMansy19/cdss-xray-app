@@ -9,9 +9,7 @@
 ![Semi-Graduation](https://img.shields.io/badge/Semi--Graduation-Project-orange)
 ![Development Time](https://img.shields.io/badge/Development-1%20Week-brightgreen)
 
-### [Live Demo](https://cdss-xray-app.vercel.app)
-### [Demo Video](https://drive.google.com/file/d/1k1fur3WzxgE3iwJYAswXxWi4q6gj_cGU/view?usp=sharing)
-### [Kaggle Dataset](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia/data)
+### [Live Demo](https://cdss-xray-app.vercel.app) | [Demo Video](https://drive.google.com/file/d/1k1fur3WzxgE3iwJYAswXxWi4q6gj_cGU/view?usp=sharing) | [Kaggle Dataset](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia/data)
 
 A Clinical Decision Support System (CDSS) web application that enables healthcare professionals to upload chest X-ray images and receive AI-powered diagnostic suggestions. This application bridges the gap between modern web technology (Next.js + Tailwind CSS) and advanced medical image processing capabilities, offering a seamless user experience with reliable diagnostic support.
 
