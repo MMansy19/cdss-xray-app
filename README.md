@@ -6,10 +6,14 @@
 ![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.0-blue)
 ![Django](https://img.shields.io/badge/Django-4.2-green)
 ![Python](https://img.shields.io/badge/Python-3.12-green)
+![Semi-Graduation](https://img.shields.io/badge/Semi--Graduation-Project-orange)
+![Development Time](https://img.shields.io/badge/Development-1%20Week-brightgreen)
 
 ## [Live Demo](https://cdss-xray-app.vercel.app)
 
 A Clinical Decision Support System (CDSS) web application that enables healthcare professionals to upload chest X-ray images and receive AI-powered diagnostic suggestions. This application bridges the gap between modern web technology (Next.js + Tailwind CSS) and advanced medical image processing capabilities, offering a seamless user experience with reliable diagnostic support.
+
+This semi-graduation project demonstrates a clean architecture approach with three distinct service layers (Frontend, Backend, and AI Analysis) that work together to provide a comprehensive medical diagnostic tool.
 
 ![App Screenshot](cdss-xray-app/public/logo2.png)
 
@@ -67,7 +71,35 @@ A Clinical Decision Support System (CDSS) web application that enables healthcar
 
 ## 🏗 Architecture
 
-The application follows a modern client-server architecture with a clear separation of concerns:
+The application follows a modern client-server architecture with a clean separation of three distinct service layers:
+
+1. **Frontend Service**: 
+   - Built with Next.js 15.3, React 19, TypeScript, and Tailwind CSS
+   - Handles user interface, interactions, and data visualization
+   - Provides responsive design for various devices and clinical settings
+   - Features interactive heatmap visualization of X-ray regions of interest
+   - Includes light/dark mode for different working environments
+   - Implements comprehensive form validation and error handling
+   - Supports downloadable diagnostic reports in PDF format
+
+2. **Backend Service**: 
+   - Developed with Django 4.2, Python 3.12, and Django REST Framework
+   - Manages API endpoints, authentication (JWT-based), and user management
+   - Handles image processing and metadata extraction
+   - Provides secure data storage and retrieval
+   - Implements clinical data validation and processing
+   - Offers comprehensive error handling and logging
+
+3. **AI Analysis Service**: 
+   - Integrates deep learning models for chest X-ray pathology detection
+   - Analyzes images for conditions like pneumonia, COVID-19, cardiomegaly, etc.
+   - Incorporates rule-based systems for diagnostic refinement using patient vitals
+   - Generates heatmaps highlighting regions of interest in X-rays
+   - Provides severity classification (Low, Moderate, High) based on findings
+   - Delivers evidence-based treatment recommendations
+   - Supports multiple diagnosis possibilities with confidence scores
+
+Each layer has clear responsibilities and communicates through well-defined interfaces:
 
 ```
 📁 cdss-xray-app/           # Frontend application
@@ -207,13 +239,15 @@ Our application follows a structured clinical workflow designed to enhance diagn
 ## 🎨 UI & UX Highlights
 
 - **Responsive Design**: Adapts seamlessly to mobile, tablet, and desktop views
-- **Theme Switching**: Elegant transition between light and dark modes
+- **Theme Switching**: Elegant transition between light and dark modes for varied clinical environments
 - **Intuitive Upload**: Simple drag-and-drop interface with progress indicators
-- **Interactive Results**: Dynamic visualization of diagnostic findings
+- **Interactive Results**: Dynamic visualization of diagnostic findings with confidence metrics
 - **Clinical Form Design**: Professional medical input forms with validation
 - **Accessibility**: WCAG-compliant design elements
 - **Guided User Flow**: Clear navigation path from upload to results
 - **Professional Medical Aesthetics**: Clean design focused on clinical utility
+- **Information Architecture**: Organized presentation of complex medical data
+- **Visual Feedback**: Clear status indicators throughout the analysis process
 
 ## 📡 Backend API Documentation
 
@@ -292,7 +326,12 @@ gunicorn core.wsgi:application
 - **Performance Optimization**: Efficient rendering with React best practices
 - **API Integration**: Clean separation between frontend and backend services
 - **Security**: Proper authentication flow with refresh tokens
-- **Testing**: Component and API endpoint tests (in progress)
+- **Testing**: Component and API endpoint tests
+- **Dual Operation Modes**: 
+  - Demo mode for standalone frontend operation
+  - Backend integration mode for production use
+- **Error Handling**: Comprehensive error handling and fallback mechanisms
+- **Development Time**: Completed in less than a week as a semi-graduation project
 
 ## 📜 License
 
@@ -315,6 +354,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 **Mahmoud Mansy**  
 [GitHub Profile](https://github.com/MMansy19)
 
+This semi-graduation project was completed in less than one week, showcasing the ability to rapidly develop a complex medical application with clean architecture principles and comprehensive features.
+
 ---
 
-Created with ❤️ for improving chest X-ray diagnostics
+Created with ❤️ for improving chest X-ray diagnostics and supporting healthcare professionals
