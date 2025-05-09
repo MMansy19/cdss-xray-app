@@ -3,6 +3,8 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/utils/apiClient';
+import {  mockLogin, mockRegister } from '@/utils/mockService';
+import { isDemoMode } from '@/lib/config';
 
 interface User {
   id?: string;
@@ -33,6 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [usingMockAuth, setUsingMockAuth] = useState(false);
   const router = useRouter();
 
   const safelyParse = <T,>(json: string | null): T | null => {
@@ -62,7 +65,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const checkAuth = () => {
       try {
-        // First try to get auth tokens
         const tokensString = safelyGet('authTokens');
         const tokens = safelyParse<AuthTokens>(tokensString);
 
@@ -77,7 +79,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
 
-        // Fallback to legacy token
         const legacyToken = safelyGet('authToken');
         if (legacyToken) {
           const userDataString = safelyGet('userData');
@@ -94,12 +95,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
 
-        // Only clear auth state if we're not in a redirect or initial page load
         if (!user) {
-          // This is a first load, don't redirect
           setLoading(false);
         } else {
-          // This is probably a reset or token expiration
           setUser(null);
           setLoading(false);
         }
@@ -109,7 +107,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    // Check immediately to avoid flash of unauthed content
     checkAuth();
 
     const handleStorageChange = (e: StorageEvent) => {
@@ -119,7 +116,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('focus', checkAuth); // Re-check auth when tab gets focus
+    window.addEventListener('focus', checkAuth);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
@@ -127,11 +124,46 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
+  useEffect(() => {
+    const checkMockMode = async () => {
+      const useMockAuth = await isDemoMode();
+      setUsingMockAuth(useMockAuth);
+
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('usingMockAuth', useMockAuth ? 'true' : 'false');
+      }
+    };
+
+    checkMockMode().catch(console.error);
+  }, []);
+
   const login = async (username: string, password: string): Promise<boolean> => {
     setLoading(true);
     setError(null);
 
     try {
+      const useMockAuth = await isDemoMode();
+
+      if (useMockAuth) {
+        const mockUser = await mockLogin(username, password);
+
+        if (mockUser) {
+          localStorage.setItem('userData', JSON.stringify(mockUser));
+          localStorage.setItem('authTokens', JSON.stringify({
+            access_token: 'mock-token',
+            refresh_token: 'mock-refresh-token'
+          }));
+          localStorage.setItem('authToken', 'mock-token');
+
+          setUser(mockUser);
+          setUsingMockAuth(true);
+          return true;
+        } else {
+          setError('Invalid username or password');
+          return false;
+        }
+      }
+
       const response = await apiRequest<any>({
         endpoint: '/auth/login/',
         method: 'POST',
@@ -182,6 +214,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setError(null);
 
     try {
+      const useMockAuth = await isDemoMode();
+
+      if (useMockAuth) {
+        const mockUser = await mockRegister(username, email, password);
+
+        if (mockUser) {
+          localStorage.setItem('userData', JSON.stringify(mockUser));
+          setUser(mockUser);
+          setUsingMockAuth(true);
+          console.log("User registered successfully (mock mode).");
+          router.push('/login');
+          return true;
+        } else {
+          setError('Registration failed in mock mode');
+          return false;
+        }
+      }
+
       const response = await apiRequest<any>({
         endpoint: '/auth/signup/',
         method: 'POST',

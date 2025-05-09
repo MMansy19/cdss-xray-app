@@ -1,10 +1,10 @@
 import { 
-  ApiError, 
   NetworkError, 
-  AuthenticationError,
   createErrorFromApiResponse,
   formatErrorForLogging
 } from './errorHandling';
+
+import { isDemoMode } from '@/lib/config';
 
 export interface ApiRequestConfig {
   endpoint: string;
@@ -57,6 +57,20 @@ function getAuthTokens(): {access_token: string | null, refresh_token: string | 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export async function apiRequest<T>(config: ApiRequestConfig): Promise<ApiResponse<T>> {
+  // First, check if we're in demo mode
+  const demoMode = await isDemoMode();
+  
+  if (demoMode) {
+    console.log('[API Client] Backend unavailable, using mock data');
+    // Return mock response for this request
+    return {
+      data: null,
+      error: null,
+      statusCode: 200,
+      loading: false
+    };
+  }
+  
   const {
     endpoint,
     method = 'GET',

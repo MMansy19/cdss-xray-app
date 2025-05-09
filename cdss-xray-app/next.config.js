@@ -14,7 +14,7 @@ const nextConfig = {
   },
   // Configure API URL for backend integration with Vercel-friendly environment variable
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000' // Will be overridden by Vercel env variable
+    NEXT_PUBLIC_API_URL: 'http://localhost:8000' // Will be overridden by Vercel env variable
   },
   // Ensure output is configured properly for Vercel
   output: 'standalone',

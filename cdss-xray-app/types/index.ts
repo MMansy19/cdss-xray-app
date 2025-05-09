@@ -11,6 +11,15 @@ export interface AuthTokens {
   refresh_token: string;
 }
 
+export interface User { 
+  id: string;
+  username: string;
+  email: string;
+  name: string;
+  bio?: string | null;
+  birth_date?: string | null;
+}
+
 export interface UserProfile {
   username: string;
   name?: string;
@@ -73,10 +82,27 @@ export interface AnalysisResultData {
 }
 
 export interface AnalysisResult {
-  success: boolean;
-  data: AnalysisResultData;
-  error?: string;
-}
+  topPrediction: Prediction;
+  predictions: Prediction[];
+  heatmapUrl: string;
+  severity: "Low" | "Moderate" | "High";
+  diagnosisWithVitals?: string;
+  treatmentSuggestions?: string[];
+  vitals?: {
+    temperature: number;
+    systolicBP: number;
+    diastolicBP: number;
+    heartRate: number;
+    birthdate?: string;
+    gender?: string;
+    hasCough: boolean;
+    hasHeadaches: boolean;
+    canSmellTaste: boolean;
+} 
+  
+    success?: boolean;
+    error?: string;
+  }
 
 // Enhanced diagnosis with vitals
 export interface FinalDiagnosisResult {

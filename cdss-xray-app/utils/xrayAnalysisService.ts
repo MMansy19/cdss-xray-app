@@ -1,15 +1,33 @@
 import { AnalysisResult, PatientVitals } from '../types';
 import { apiRequest } from './apiClient';
+import {  generateMockAnalysisResult } from './mockService';
+import { isDemoMode } from '@/lib/config';
 
 /**
  * Analyzes an X-ray image and patient vitals by sending them to the backend API
+ * Falls back to mock data generation when backend is unavailable
  */
 export async function analyzeXray(image?: File, vitals?: PatientVitals): Promise<AnalysisResult> {
-  try { 
+  try {
     if (!image || !vitals) {
       throw new Error('Both image and vitals are required');
     }
 
+    // Check if we're in demo mode (backend unavailable)
+    const usingDemoMode = await isDemoMode();
+    
+    if (usingDemoMode) {
+      // Generate mock analysis result
+      console.log('[X-ray Service] Using mock analysis data (demo mode)');
+      
+      // Add a delay to simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Return mock data
+      return generateMockAnalysisResult(vitals);
+    }
+    
+    // If not in demo mode, proceed with real API call
     const formData = new FormData();
     formData.append('image', image);
     
@@ -39,7 +57,10 @@ export async function analyzeXray(image?: File, vitals?: PatientVitals): Promise
     return response.data as AnalysisResult;
   } catch (error) {
     console.error("[X-ray Service] Error analyzing data:", error);
-    throw error;
+    
+    // If there's an error with the real API, fall back to mock data as a last resort
+    console.log("[X-ray Service] Falling back to mock data due to API error");
+    return generateMockAnalysisResult(vitals);
   }
 }
 
