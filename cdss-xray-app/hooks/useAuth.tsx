@@ -3,8 +3,9 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/utils/apiClient';
-import {  mockLogin, mockRegister } from '@/utils/mockService';
+import { mockLogin, mockRegister } from '@/utils/mockService';
 import { isDemoMode } from '@/lib/config';
+import { isValidationError, ValidationError } from '@/utils/errorHandling';
 
 interface User {
   id?: string;
@@ -239,7 +240,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         requiresAuth: false
       });      if (response.error) {
         // Check if this is a validation error with detailed field errors
-        if (response.error) {
+        if (isValidationError(response.error)) {
           // Format field errors into a readable message
           const fieldErrors = Object.entries(response.error.fields)
             .map(([field, message]) => `${field}: ${message}`)
