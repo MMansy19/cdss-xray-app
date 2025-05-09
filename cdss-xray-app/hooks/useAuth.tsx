@@ -215,7 +215,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setError(null);
 
     try {
-      const useMockAuth = await isDemoMode();      if (useMockAuth) {
+      const useMockAuth = await isDemoMode();      
+      if (useMockAuth) {
         try {
           const mockUser = await mockRegister(username, email, password);
 

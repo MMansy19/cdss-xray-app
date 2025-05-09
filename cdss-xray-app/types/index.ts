@@ -81,11 +81,20 @@ export interface AnalysisResultData {
   treatmentSuggestions?: string[];
 }
 
+export interface HeatmapRegion {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  confidence: number;
+}
+
 export interface AnalysisResult {
   topPrediction: Prediction;
   predictions: Prediction[];
   heatmapUrl: string;
-  severity: "Low" | "Moderate" | "High";
+  regions?: HeatmapRegion[];
+  severity: string;
   diagnosisWithVitals?: string;
   treatmentSuggestions?: string[];
   vitals?: {
