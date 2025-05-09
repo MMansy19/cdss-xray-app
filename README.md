@@ -1,4 +1,4 @@
-# 🩺 CDSS Chest X-ray Analysis Application
+# 🩺 AI-Powered Chest X-Ray CDSS
 
 ![Next.js](https://img.shields.io/badge/Next.js-15.3-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
