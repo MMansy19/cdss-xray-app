@@ -215,20 +215,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setError(null);
 
     try {
-      const useMockAuth = await isDemoMode();
+      const useMockAuth = await isDemoMode();      if (useMockAuth) {
+        try {
+          const mockUser = await mockRegister(username, email, password);
 
-      if (useMockAuth) {
-        const mockUser = await mockRegister(username, email, password);
-
-        if (mockUser) {
-          localStorage.setItem('userData', JSON.stringify(mockUser));
-          setUser(mockUser);
-          setUsingMockAuth(true);
-          console.log("User registered successfully (mock mode).");
-          router.push('/login');
-          return true;
-        } else {
-          setError('Registration failed in mock mode');
+          if (mockUser) {
+            localStorage.setItem('userData', JSON.stringify(mockUser));
+            setUser(mockUser);
+            setUsingMockAuth(true);
+            console.log("User registered successfully (mock mode).");
+            
+            // Set a session flag to show success notification on login page
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('registrationSuccess', 'true');
+              sessionStorage.setItem('registeredEmail', email || '');
+            }
+            
+            router.push('/login');
+            return true;
+          } else {
+            setError('Registration failed in mock mode');
+            return false;
+          }
+        } catch (err) {
+          // Convert the regular Error to a ValidationError
+          if (err instanceof Error && err.message.includes('already exists')) {
+            setError(`Username is already taken\nusername: ${err.message}`);
+          } else {
+            setError((err as Error).message || 'Registration failed in mock mode');
+          }
           return false;
         }
       }
@@ -238,15 +253,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         method: 'POST',
         body: { username, email, password },
         requiresAuth: false
-      });      if (response.error) {
-        // Check if this is a validation error with detailed field errors
+      });      if (response.error) {      // Check if this is a validation error with detailed field errors
         if (isValidationError(response.error)) {
           // Format field errors into a readable message
           const fieldErrors = Object.entries(response.error.fields)
             .map(([field, message]) => `${field}: ${message}`)
             .join('\n');
           
-          setError(`${response.error.message || 'Validation failed'}\n${fieldErrors}`);
+          // Specifically handle username already exists error with a more user-friendly message
+          if (response.error.fields.username && 
+              typeof response.error.fields.username === 'string' &&
+              response.error.fields.username.toLowerCase().includes('already exists')) {
+            setError(`Username is already taken\nusername: ${response.error.fields.username}`);
+          } else {
+            // Create a more structured error message that can be parsed by the form component
+            setError(`${response.error.message || 'Validation failed'}\n${fieldErrors}`);
+          }
         } else {
           // Use the error message directly
           setError(response.error.message || 'Registration failed');

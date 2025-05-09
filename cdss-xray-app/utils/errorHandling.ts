@@ -62,23 +62,43 @@ export function createErrorFromApiResponse(status: number, data: any): Error {
   if (status === 401 || status === 403) {
     return new AuthenticationError(data?.message || 'Authentication failed');
   }
-  
-  // Validation errors
+    // Validation errors
   if (status === 422 || status === 400) {
     const fields: Record<string, string> = {};
     
     // Handle different validation error formats
     if (data && typeof data === 'object') {
+      // Check if this is a non-field error
+      if (data.non_field_errors) {
+        const nonFieldErrors = Array.isArray(data.non_field_errors) 
+          ? data.non_field_errors.join(', ')
+          : String(data.non_field_errors);
+          
+        return new ValidationError(nonFieldErrors, { 'general': nonFieldErrors });
+      }
+      
+      // Handle regular field errors
       Object.entries(data).forEach(([key, value]) => {
         if (Array.isArray(value)) {
-          fields[key] = (value as string[]).join(', ');
+          fields[key] = value.join(', ');
         } else if (typeof value === 'string') {
           fields[key] = value;
+        } else if (value !== null && typeof value === 'object') {
+          // Handle nested validation errors
+          fields[key] = JSON.stringify(value);
         }
       });
     }
     
-    return new ValidationError(data?.message || 'Validation failed', fields);
+    // Find a suitable message from the fields
+    let message = 'Validation failed';
+    if (Object.keys(fields).length > 0) {
+      // Use the first field error as the main message
+      const firstField = Object.keys(fields)[0];
+      message = `${firstField}: ${fields[firstField]}`;
+    }
+    
+    return new ValidationError(data?.message || message, fields);
   }
   
   // Server errors

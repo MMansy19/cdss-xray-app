@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, Mail, Key, LogIn } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
@@ -69,23 +69,12 @@ const RegisterForm = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Parse API error message which might contain field-specific errors
-  const parseApiError = (errorMessage: string | null) => {
-    if (!errorMessage) return;
+  };  // Parse API error message which might contain field-specific errors
+  const parseApiError = (errorMessage: string | null): string | undefined => {
+    if (!errorMessage) return undefined;
     
     try {
-      // Check if the error is a JSON string
-      if (errorMessage.includes('{') && errorMessage.includes('}')) {
-        const errorJson = JSON.parse(errorMessage);
-        if (errorJson.fields) {
-          setFieldErrors(errorJson.fields);
-          return errorJson.message || 'Validation failed';
-        }
-      }
-      
-      // Look for field errors in the format "field: error message"
+      // First check for field-specific errors in the format "field: error message"
       if (errorMessage.includes('\n')) {
         const lines = errorMessage.split('\n');
         const mainMessage = lines[0];
@@ -94,15 +83,21 @@ const RegisterForm = () => {
         for (let i = 1; i < lines.length; i++) {
           const line = lines[i];
           const [field, ...messageParts] = line.split(':');
-          if (messageParts.length) {
+          if (messageParts.length && field) {
             fieldErrorsMap[field.trim()] = messageParts.join(':').trim();
           }
         }
         
         if (Object.keys(fieldErrorsMap).length) {
-          setFieldErrors(fieldErrorsMap);
-          return mainMessage;
+          // Update field errors but don't trigger a re-render in the parsing function
+          return mainMessage || 'Validation failed';
         }
+      }
+      
+      // Special case for "username already exists" error which is common
+      if (errorMessage.toLowerCase().includes('username') && 
+          errorMessage.toLowerCase().includes('exists')) {
+        return 'Username is already taken';
       }
     } catch (e) {
       // If parsing fails, just use the error message as is
@@ -111,9 +106,51 @@ const RegisterForm = () => {
     
     return errorMessage;
   };
-
-  // Display error checks for field-specific errors or falls back to general errors
-  const displayError = validationError || parseApiError(error);
+  // Use useMemo to prevent infinite re-renders
+  const [displayError, parsedFieldErrors] = useMemo(() => {
+    if (validationError) {
+      return [validationError, {}];
+    }
+    
+    if (error) {
+      try {
+        // Process field-specific errors
+        let newFieldErrors: Record<string, string> = {};
+        
+        // First check for field-specific errors in the format "field: error message"
+        if (error.includes('\n')) {
+          const lines = error.split('\n');
+          
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+            const [field, ...messageParts] = line.split(':');
+            if (messageParts.length && field) {
+              newFieldErrors[field.trim()] = messageParts.join(':').trim();
+            }
+          }
+        }
+        
+        // Special case for username exists
+        if (error.toLowerCase().includes('username') && 
+            error.toLowerCase().includes('exists')) {
+          newFieldErrors.username = 'A user with that username already exists.';
+        }
+        
+        return [parseApiError(error), newFieldErrors];
+      } catch (e) {
+        console.error('Error parsing API error:', e);
+        return [error, {}];
+      }
+    }
+    
+    return [undefined, {}];
+  }, [validationError, error]);
+    // Apply parsed field errors
+  useEffect(() => {
+    if (Object.keys(parsedFieldErrors).length > 0) {
+      setFieldErrors(parsedFieldErrors);
+    }
+  }, [parsedFieldErrors]);
   
   // Helper to check if a specific field has an error
   const hasFieldError = (fieldName: string) => {
@@ -129,8 +166,7 @@ const RegisterForm = () => {
     <div className="w-full max-w-md">
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Username Field */}
-        <div>
-          <div className="mb-1">
+        <div>          <div className="mb-1">
             <label 
               htmlFor="username" 
               className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
@@ -152,10 +188,12 @@ const RegisterForm = () => {
                   hasFieldError('username') ? 'border-red-500' : 
                   displayError ? 'border-red-300' : 'border-gray-300'
                 } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                aria-invalid={hasFieldError('username')}
+                aria-describedby={hasFieldError('username') ? "username-error" : undefined}
               />
             </div>
             {hasFieldError('username') && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400">{getFieldErrorMessage('username')}</p>
+              <p id="username-error" className="mt-1 text-sm text-red-600 dark:text-red-400 font-medium">{getFieldErrorMessage('username')}</p>
             )}
           </div>
         </div>
@@ -250,11 +288,17 @@ const RegisterForm = () => {
               />
             </div>
           </div>
-        </div>
-
-        {displayError && Object.keys(fieldErrors).length === 0 && (
+        </div>        {/* Display general errors or field-specific error summary */}
+        {displayError && (
           <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-            <p className="text-sm text-red-600 dark:text-red-400">{displayError}</p>
+            <p className="text-sm font-medium text-red-600 dark:text-red-400">{displayError}</p>
+            {Object.keys(fieldErrors).length > 0 && (
+              <ul className="mt-2 text-sm text-red-600 dark:text-red-400 list-disc list-inside">
+                {Object.entries(fieldErrors).map(([field, message]) => (
+                  <li key={field}>{field}: {message}</li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
 

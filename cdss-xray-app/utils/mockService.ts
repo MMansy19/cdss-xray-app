@@ -1,6 +1,11 @@
 import { AnalysisResult, PatientVitals, User } from '../types';
 
 
+/**
+ * Keep track of dynamically created users during the session
+ */
+const dynamicUsers: Record<string, User> = {};
+
 export const isDemoModeSync = (): boolean => {
   // This uses the cached result from previous async checks
   // If no check has been done yet, assume backend is not available
@@ -44,19 +49,33 @@ export const mockLogin = async (username: string, password: string): Promise<Use
   // Short delay to simulate network request
   await new Promise(resolve => setTimeout(resolve, 800));
   
-  // Check if username exists in mock users and password is correct
-  if (MOCK_USERS[username.toLowerCase()] && password === MOCK_PASSWORD) {
-    return MOCK_USERS[username.toLowerCase()];
+  // Check if this is a predefined mock user
+  if (MOCK_USERS[username.toLowerCase()]) {
+    // For predefined users, we still check the password, but only in non-demo environments
+    if (process.env.NODE_ENV !== 'production' || password === MOCK_PASSWORD) {
+      return MOCK_USERS[username.toLowerCase()];
+    }
   }
-  
-  // Special case: any username with the demo password works
-  if (password === MOCK_PASSWORD) {
-    return {
+    // In demo mode, allow login with any username and any password
+  // This makes testing easier and removes barriers for users trying the demo
+  if (username && password) {
+    // Check if this user was dynamically created in this session
+    if (dynamicUsers[username.toLowerCase()]) {
+      return dynamicUsers[username.toLowerCase()];
+    }
+    
+    // Generate a user profile based on the provided username
+    const newUser = {
       id: `mock-id-${Date.now()}`,
       username: username,
-      email: `${username}@example.com`,
-      name: username
+      email: username.includes('@') ? username : `${username}@example.com`,
+      name: username.charAt(0).toUpperCase() + username.slice(1) // Capitalize first letter
     };
+    
+    // Store this dynamic user for future logins
+    dynamicUsers[username.toLowerCase()] = newUser;
+    
+    return newUser;
   }
   
   return null;
@@ -68,14 +87,26 @@ export const mockLogin = async (username: string, password: string): Promise<Use
 export const mockRegister = async (username: string, email: string, password: string): Promise<User | null> => {
   // Short delay to simulate network request
   await new Promise(resolve => setTimeout(resolve, 1000));
+    // Check if the username already exists in our mock database or in dynamically created users
+  if (MOCK_USERS[username.toLowerCase()] || dynamicUsers[username.toLowerCase()]) {
+    // Simulate a validation error for existing username
+    // This will be caught and handled by the error handling system
+    throw new Error('A user with that username already exists.');
+  }
   
-  // In demo mode, registration always succeeds
-  return {
+  // Create new user
+  const newUser = {
     id: `mock-id-${Date.now()}`,
     username,
     email,
-    name: username
+    name: username.charAt(0).toUpperCase() + username.slice(1) // Capitalize first letter
   };
+  
+  // Store this user for future logins
+  dynamicUsers[username.toLowerCase()] = newUser;
+  
+  // In demo mode, registration always succeeds
+  return newUser;
 };
 
 /**
