@@ -11,7 +11,7 @@
 
 ### [Live Demo](https://cdss-xray-app.vercel.app) | [Demo Video](https://drive.google.com/file/d/1k1fur3WzxgE3iwJYAswXxWi4q6gj_cGU/view?usp=sharing) | [Kaggle Dataset](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia/data)
 
-A Clinical Decision Support System (CDSS) web application that enables healthcare professionals to upload chest X-ray images and receive AI-powered diagnostic suggestions. This application bridges the gap between modern web technology (Next.js + Tailwind CSS) and advanced medical image processing capabilities, offering a seamless user experience with reliable diagnostic support.
+A Clinical Decision Support System (CDSS) for analyzing chest X-ray images to detect pneumonia and aid COVID-19 diagnosis. Built with a Convolutional Neural Network (CNN) trained on the Kaggle Chest X-ray Pneumonia Dataset (~5,000 images), achieving 89.9% accuracy. Features a full-stack architecture with Next.js, Django, TensorFlow, and PostgreSQL, supporting drag-and-drop uploads, patient vitals input, and detailed diagnostic reports. Includes demo and integrated BE modes for seamless UX. Developed as a course project at Cairo University, rivaling graduation project quality.
 
 This semi-graduation project demonstrates a clean architecture approach with three distinct service layers (Frontend, Backend, and AI Analysis) that work together to provide a comprehensive medical diagnostic tool.
 
