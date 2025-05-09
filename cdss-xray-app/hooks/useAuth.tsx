@@ -237,19 +237,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         method: 'POST',
         body: { username, email, password },
         requiresAuth: false
-      });
-
-      if (response.error) {
-        setError(response.error.message || 'Registration failed');
+      });      if (response.error) {
+        // Check if this is a validation error with detailed field errors
+        if (response.error) {
+          // Format field errors into a readable message
+          const fieldErrors = Object.entries(response.error.fields)
+            .map(([field, message]) => `${field}: ${message}`)
+            .join('\n');
+          
+          setError(`${response.error.message || 'Validation failed'}\n${fieldErrors}`);
+        } else {
+          // Use the error message directly
+          setError(response.error.message || 'Registration failed');
+        }
         return false;
       }
 
       const data = response.data;
 
       if (data) {
-        localStorage.setItem('userData', JSON.stringify(data));
-        setUser(data);
+        // Show success message and redirect to login
         console.log("User registered successfully.");
+        
+        // Set a session flag to show success notification on login page
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('registrationSuccess', 'true');
+          sessionStorage.setItem('registeredEmail', email || '');
+        }
+        
         router.push('/login');
         return true;
       } else {

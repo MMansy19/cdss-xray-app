@@ -1,16 +1,48 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, LogIn } from 'lucide-react';
+import { User, LogIn, CheckCircle } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 
 const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
   const router = useRouter();
   const { login, error } = useAuth();
+
+  // Check for registration success message in session storage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const registrationSuccessful = sessionStorage.getItem('registrationSuccess') === 'true';
+      const email = sessionStorage.getItem('registeredEmail') || '';
+      
+      if (registrationSuccessful) {
+        setRegistrationSuccess(true);
+        setRegisteredEmail(email);
+        
+        // Set username if email is provided
+        if (email.includes('@')) {
+          const usernameFromEmail = email.split('@')[0];
+          setUsername(usernameFromEmail);
+        }
+        
+        // Clear success message from session storage
+        sessionStorage.removeItem('registrationSuccess');
+        sessionStorage.removeItem('registeredEmail');
+        
+        // Auto-hide success message after 8 seconds
+        const timeoutId = setTimeout(() => {
+          setRegistrationSuccess(false);
+        }, 8000);
+        
+        return () => clearTimeout(timeoutId);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +63,20 @@ const LoginForm = () => {
 
   return (
     <div className="w-full max-w-md">
+      {registrationSuccess && (
+        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md flex items-start">
+          <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mr-3 mt-0.5" />
+          <div>
+            <p className="text-sm text-green-700 dark:text-green-300 font-medium">
+              Registration successful!
+            </p>
+            <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+              Your account has been created{registeredEmail ? ` for ${registeredEmail}` : ''}. Please sign in with your credentials.
+            </p>
+          </div>
+        </div>
+      )}
+      
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <div className="mb-1">

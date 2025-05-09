@@ -25,8 +25,7 @@ A Clinical Decision Support System (CDSS) web application built with Next.js and
    ```
 3. Set up environment variables by creating a `.env.local` file:
    ```
-   NEXT_PUBLIC_API_URL=http://localhost:8000/api
-   NEXT_PUBLIC_DEMO_MODE=auto
+   NEXT_PUBLIC_API_URL=http://localhost:8000
    ```
 
 ### Development
@@ -129,9 +128,6 @@ The application supports a demo mode that works without a backend API. This is u
 
 Demo mode can be configured in three ways:
 
-1. **Environment Variable**: Set `NEXT_PUBLIC_DEMO_MODE=true` in `.env.local`
-2. **Auto Detection**: Set `NEXT_PUBLIC_DEMO_MODE=auto` for automatic backend detection
-3. **Manual Toggle**: Use the Demo Mode toggle component in the UI
 
 ### Authentication
 
