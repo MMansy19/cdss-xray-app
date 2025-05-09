@@ -65,7 +65,9 @@ export default function ResultPage() {
       const covidPrediction: { label: string; confidence: number } | undefined = data.predictions.find(
         (p: { label: string; confidence: number }) => p.label === 'COVID-19' || p.label === 'Covid-19'
       );
-      const pneumoniaPrediction = data.predictions.find(p => p.label === 'Pneumonia');
+      const pneumoniaPrediction: { label: string; confidence: number } | undefined = data.predictions.find(
+        (p: { label: string; confidence: number }) => p.label === 'Pneumonia'
+      );
       
       if (covidPrediction && covidPrediction.confidence >= HIGH_RISK_THRESHOLD) {
         setHighRiskCondition({ name: 'COVID-19', confidence: covidPrediction.confidence });
@@ -98,9 +100,9 @@ export default function ResultPage() {
       // We keep the original values but ensure "normal" is the highest
       if (data['Normal']) {
         // Find the current highest value
-        const maxValue = Math.max(...Object.values(data));
+        const maxValue = Math.max(...Object.values(data) as number[]);
         // Set normal to be higher than the current max value
-        processedData['Normal'] = Math.max(data['Normal'], maxValue + 0.1);
+        processedData['Normal'] = Math.max(data['Normal'] as number, maxValue + 0.1);
       } else {
         // If there's no normal key yet, add it with a high value
         processedData['Normal'] = 0.9;
