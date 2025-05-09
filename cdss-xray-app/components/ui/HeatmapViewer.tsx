@@ -6,7 +6,7 @@ import { Eye, EyeOff, SlidersHorizontal } from 'lucide-react';
 interface HeatmapViewerProps {
   originalImageUrl: string;
   heatmapUrl?: string;
-  predictionResult?: Record<string, number>;
+  predictionResult?: Record<string, any>;
   className?: string;
 }
 

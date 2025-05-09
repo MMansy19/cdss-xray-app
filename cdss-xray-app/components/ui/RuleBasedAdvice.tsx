@@ -3,15 +3,34 @@
 import { AlertTriangle, BookOpen, Stethoscope } from 'lucide-react';
 
 interface RuleBasedAdviceProps {
-  result: Record<string, number>;
+  result: Record<string, any>;
   className?: string;
 }
 
-const RuleBasedAdvice: React.FC<RuleBasedAdviceProps> = ({ result, className = '' }) => {
-  // Extract diagnosis entries (exclude non-diagnosis fields like age)
-  const diagnosisEntries = Object.entries(result)
-    .filter(([key]) => !['age'].includes(key))
-    .map(([label, confidence]) => ({ label, confidence }));
+const RuleBasedAdvice: React.FC<RuleBasedAdviceProps> = ({ result, className = '' }) => {  // Handle both structured and flat data formats
+  let diagnosisEntries: Array<{label: string, confidence: number}> = [];
+  
+  if (result.predictions && Array.isArray(result.predictions) && result.predictions.length > 0) {
+    // Handle the case where result has predictions array (from mockService)
+    diagnosisEntries = result.predictions.map((p: {label: string, confidence: number}) => ({
+      label: p.label,
+      confidence: p.confidence
+    }));
+  } else if (result.topPrediction && typeof result.topPrediction === 'object') {
+    // Use topPrediction if available
+    diagnosisEntries = [{ 
+      label: String(result.topPrediction.label), 
+      confidence: Number(result.topPrediction.confidence) 
+    }];
+  } else {
+    // Handle the flat object structure
+    diagnosisEntries = Object.entries(result)
+      .filter(([key]) => !['age', 'topPrediction', 'predictions', 'heatmapUrl', 'regions', 'severity', 'diagnosisWithVitals', 'treatmentSuggestions', 'vitals'].includes(key))
+      .map(([label, confidence]) => ({ 
+        label: String(label), 
+        confidence: Number(confidence) 
+      }));
+  }
   
   // Find the top prediction (highest confidence)
   const topPrediction = diagnosisEntries.reduce(

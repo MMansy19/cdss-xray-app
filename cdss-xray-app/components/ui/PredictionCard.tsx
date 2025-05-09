@@ -4,15 +4,30 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 import { AlertTriangle, CheckCircle, Info } from 'lucide-react';
 
 interface PredictionCardProps {
-  result: Record<string, number>;
+  result: Record<string, any>;
   className?: string;
 }
 
 const PredictionCard: React.FC<PredictionCardProps> = ({ result, className = '' }) => {
-  // Extract diagnosis entries (exclude non-diagnosis fields like age)
-  const diagnosisEntries = Object.entries(result)
-    .filter(([key]) => !['age'].includes(key))
-    .map(([label, confidence]) => ({ label, confidence }));
+  // Check if result has predictions array structure or flat object structure
+  let diagnosisEntries = [];
+  
+  if (result.predictions && Array.isArray(result.predictions) && result.predictions.length > 0) {
+    // Handle the case where result has predictions array (from mockService)
+    diagnosisEntries = result.predictions.map((p: any) => ({
+      label: p.label,
+      confidence: p.confidence
+    }));
+    
+    // Sort by confidence (highest first)
+    diagnosisEntries.sort((a, b) => b.confidence - a.confidence);
+  } else {
+    // Handle the flat object structure
+    diagnosisEntries = Object.entries(result)
+      .filter(([key]) => !['age', 'topPrediction', 'predictions', 'heatmapUrl', 'regions', 'severity', 'diagnosisWithVitals', 'treatmentSuggestions', 'vitals'].includes(key))
+      .map(([label, confidence]) => ({ label, confidence: Number(confidence) }))
+      .sort((a, b) => b.confidence - a.confidence);
+  }
   
   // Find the top prediction (highest confidence)
   const topPrediction = diagnosisEntries.reduce(
@@ -22,12 +37,43 @@ const PredictionCard: React.FC<PredictionCardProps> = ({ result, className = '' 
   
   // Ensure confidence is capped at 100% (1.0)
   topPrediction.confidence = Math.min(topPrediction.confidence, 1.0);
+    // Format prediction data for the chart  // Make sure we have chart data to display
+  // If we're still not getting entries from the main logic, try fallback options
+  let chartEntries = diagnosisEntries;
   
-  // Format prediction data for the chart
-  const chartData = diagnosisEntries.map(pred => ({
-    name: pred.label,
-    confidence: Math.min(Math.round(pred.confidence * 100), 100)
-  }));
+  // If the array is empty but there's a topPrediction in the result, use that
+  if (diagnosisEntries.length === 0) {
+    if (result.topPrediction) {
+      chartEntries = [{
+        label: result.topPrediction.label,
+        confidence: result.topPrediction.confidence
+      }];
+      
+      // If there are also secondary findings, add those
+      if (result.predictions && Array.isArray(result.predictions)) {
+        // Add other predictions beyond the top one
+        const secondaryFindings = result.predictions.filter((p: any) => 
+          p.label !== result.topPrediction.label
+        );
+        
+        chartEntries = [...chartEntries, ...secondaryFindings.map((p: any) => ({
+          label: p.label,
+          confidence: p.confidence
+        }))];
+      }
+    }
+  }
+  
+  // Sort by confidence (highest first)
+  chartEntries.sort((a, b) => b.confidence - a.confidence);
+    // Generate chart data with consistent formatting
+  // Limit to at most 5 items to avoid overcrowding the chart
+  const chartData = chartEntries
+    .slice(0, 5)  // Only show top 5 predictions
+    .map(pred => ({
+      name: pred.label,
+      confidence: Math.min(Math.round(pred.confidence * 100), 100)
+    }));
 
   // Determine status color based on top prediction
   const getStatusColor = () => {
@@ -93,8 +139,7 @@ const PredictionCard: React.FC<PredictionCardProps> = ({ result, className = '' 
       <div className="mb-4">
         <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
           Differential Diagnosis
-        </h4>
-        <div className="h-48">
+        </h4>      <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
@@ -108,7 +153,8 @@ const PredictionCard: React.FC<PredictionCardProps> = ({ result, className = '' 
                 {chartData.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
-                    fill={entry.name === topPrediction.label ? '#3B82F6' : '#94A3B8'} 
+                    fill={entry.name === topPrediction.label ? '#3B82F6' : 
+                          entry.confidence > 30 ? '#60A5FA' : '#94A3B8'} 
                   />
                 ))}
               </Bar>

@@ -182,11 +182,13 @@ export const generateMockAnalysisResult = (patientVitals?: PatientVitals): Analy
           'Follow-up in 3 months',
           'Consider pulmonary function testing',
           'Age-appropriate screening'
-        ];
-      } else {
+        ];      } else {
         primaryFinding = 'Normal';
-        secondaryFinding = Math.random() > 0.9 ? 'Nodule' : null;
-        severity = secondaryFinding ? 'Mild' : 'Normal';
+        // Always add secondary findings with lower confidence for differential diagnosis
+        secondaryFinding = 'Nodule'; // Always have at least one secondary finding
+        // Add some other conditions to the list of predictions
+        const additionalFindings = ['Atelectasis', 'Infiltration', 'Cardiomegaly'];
+        severity = 'Normal';
         treatmentSuggestions = [
           'No acute intervention needed',
           'Age-appropriate routine follow-up'
@@ -256,6 +258,26 @@ export const generateMockAnalysisResult = (patientVitals?: PatientVitals): Analy
     }
     diagnosisText += `. Assessment: ${severity} severity.`;
   }
+  // Generate additional findings with lower confidence for differential diagnosis
+  const additionalPredictions: Array<{label: string, confidence: number}> = [];
+  
+  // If the primary finding is Normal, always add some differential diagnoses
+  if (primaryFinding === 'Normal') {
+    // Add a random set of potential findings with low confidence
+    const potentialFindings = ['Atelectasis', 'Infiltration', 'Cardiomegaly', 'Nodule', 'Emphysema'];
+    // Select 2-3 random findings
+    const shuffled = [...potentialFindings].sort(() => 0.5 - Math.random());
+    const selectedFindings = shuffled.slice(0, 2 + Math.floor(Math.random() * 2));
+    
+    selectedFindings.forEach(finding => {
+      // Generate low confidence values between 5% and 15%
+      const lowConfidence = 0.05 + (Math.random() * 0.1);
+      additionalPredictions.push({
+        label: finding,
+        confidence: lowConfidence
+      });
+    });
+  }
   
   return {
     topPrediction: {
@@ -270,7 +292,8 @@ export const generateMockAnalysisResult = (patientVitals?: PatientVitals): Analy
       ...(secondaryFinding ? [{
         label: secondaryFinding,
         confidence: secondaryConfidence
-      }] : [])
+      }] : []),
+      ...additionalPredictions
     ],
     heatmapUrl: heatmapData.heatmapUrl,
     regions: heatmapData.regions,

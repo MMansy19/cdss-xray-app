@@ -54,12 +54,29 @@ export default function ResultPage() {
       setIsLoading(false);
     }
   }, [router]);
-  
-  // Process the results: check high-risk conditions and normalize if needed
-  const processResults = (data: Record<string, number>) => {
+    // Process the results: check high-risk conditions and normalize if needed
+  const processResults = (data: any) => {
     // Create a copy of the data that we can modify
     const processedData = { ...data };
     
+    // Handle structured result format (from mockService)
+    if (data.predictions && Array.isArray(data.predictions)) {
+      // Check for high risk conditions in predictions array
+      const covidPrediction: { label: string; confidence: number } | undefined = data.predictions.find(
+        (p: { label: string; confidence: number }) => p.label === 'COVID-19' || p.label === 'Covid-19'
+      );
+      const pneumoniaPrediction = data.predictions.find(p => p.label === 'Pneumonia');
+      
+      if (covidPrediction && covidPrediction.confidence >= HIGH_RISK_THRESHOLD) {
+        setHighRiskCondition({ name: 'COVID-19', confidence: covidPrediction.confidence });
+      } else if (pneumoniaPrediction && pneumoniaPrediction.confidence >= HIGH_RISK_THRESHOLD) {
+        setHighRiskCondition({ name: 'Pneumonia', confidence: pneumoniaPrediction.confidence });
+      }
+      
+      return processedData;
+    }
+    
+    // Handle flat object format
     // Check for COVID-19 with confidence above high-risk threshold
     if (data['Covid-19'] && data['Covid-19'] >= HIGH_RISK_THRESHOLD) {
       setHighRiskCondition({ name: 'COVID-19', confidence: data['Covid-19'] });
