@@ -25,8 +25,8 @@ def predict_pneumonia(image_file):
         img = Image.open(io.BytesIO(image_file.read()))
         
         # Preprocess image
-        img = img.convert('RGB')  # Ensure consistent channels
-        img = img.resize((64, 64))  # Resize to match model's expected input
+        img = img.convert('L')  # Ensure consistent channels
+        img = img.resize((150, 150))  # Resize to match model's expected input
         
         # Convert to array
         img_array = image.img_to_array(img)
@@ -39,8 +39,8 @@ def predict_pneumonia(image_file):
         # Get result with confidence
         has_pneumonia = bool(prediction[0][0] > 0.5)    
         confidence = float(prediction[0][0] if has_pneumonia else 1 - prediction[0][0])
-        if 'NORMAL' in original_filename:
-            has_pneumonia = False
+        # if 'NORMAL' in original_filename:
+        #     has_pneumonia = False
         print(f'Confidence: {confidence}, Has Pneumonia: {has_pneumonia}')
         return has_pneumonia
         
